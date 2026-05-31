@@ -16,8 +16,10 @@ import {
 } from "lucide-react";
 import { useGetMyAffiliate, useEnrollAffiliate } from "@workspace/api-client-react";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 export default function KolOnboardingPage() {
+  const { t } = useTranslation();
   const { data: affiliate, isLoading } = useGetMyAffiliate();
   const { mutate: enroll, isPending: enrolling } = useEnrollAffiliate();
 

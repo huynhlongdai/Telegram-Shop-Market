@@ -21,6 +21,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 async function apiFetch(path: string, token: string, opts: RequestInit = {}) {
   const res = await fetch(`/api${path}`, {
@@ -32,6 +33,7 @@ async function apiFetch(path: string, token: string, opts: RequestInit = {}) {
 }
 
 export default function AdminPage() {
+  const { t } = useTranslation();
   const { token } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"overview" | "shops" | "disputes">("overview");
@@ -134,28 +136,28 @@ export default function AdminPage() {
                   <div className="bg-emerald-500/5 border border-emerald-500/10 p-3 rounded-xl">
                     <div className="flex items-center gap-1.5 text-emerald-400 mb-2">
                       <Store className="w-3.5 h-3.5" />
-                      <span className="text-xs font-medium">Shops Active</span>
+                      <span className="text-xs font-medium">{t("admin.shopsActive")}</span>
                     </div>
                     <div className="text-xl font-bold text-emerald-400">{stats?.activeShops ?? 0}</div>
                   </div>
                   <div className="bg-blue-500/5 border border-blue-500/10 p-3 rounded-xl">
                     <div className="flex items-center gap-1.5 text-blue-400 mb-2">
                       <ShoppingCart className="w-3.5 h-3.5" />
-                      <span className="text-xs font-medium">Total Orders</span>
+                      <span className="text-xs font-medium">{t("admin.totalOrders")}</span>
                     </div>
                     <div className="text-xl font-bold text-blue-400">{stats?.totalOrders ?? 0}</div>
                   </div>
                   <div className="bg-red-500/5 border border-red-500/20 p-3 rounded-xl">
                     <div className="flex items-center gap-1.5 text-red-400 mb-2">
                       <AlertTriangle className="w-3.5 h-3.5" />
-                      <span className="text-xs font-medium">Open Disputes</span>
+                      <span className="text-xs font-medium">{t("admin.openDisputes")}</span>
                     </div>
                     <div className="text-xl font-bold text-red-400">{stats?.openDisputes ?? 0}</div>
                   </div>
                   <div className="bg-amber-500/5 border border-amber-500/10 p-3 rounded-xl">
                     <div className="flex items-center gap-1.5 text-amber-400 mb-2">
                       <Lock className="w-3.5 h-3.5" />
-                      <span className="text-xs font-medium">Total Revenue</span>
+                      <span className="text-xs font-medium">{t("admin.totalRevenue")}</span>
                     </div>
                     <div className="text-lg font-bold text-amber-400">
                       {Number(stats?.totalRevenue ?? 0).toFixed(0)} <span className="text-xs opacity-70">USDT</span>
@@ -165,7 +167,7 @@ export default function AdminPage() {
 
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
                   <h2 className="text-sm font-semibold text-zinc-100 flex items-center gap-1.5 mb-4">
-                    <BarChart3 className="w-4 h-4 text-zinc-400" /> Platform Revenue
+                    <BarChart3 className="w-4 h-4 text-zinc-400" /> {t("admin.platformRevenue")}
                   </h2>
                   <div className="flex items-end gap-1 h-12 mb-3">
                     {[40, 55, 30, 70, 65, 85, 100].map((h, i) => (
@@ -178,7 +180,7 @@ export default function AdminPage() {
                   </div>
                   <div className="text-xs text-zinc-400 flex items-center gap-1">
                     <TrendingUp className="w-3 h-3 text-emerald-400" />
-                    <span className="text-emerald-400">+18%</span> vs last month
+                    <span className="text-emerald-400">+18%</span> {t("admin.vsLastMonth")}
                   </div>
                 </div>
 
@@ -188,22 +190,22 @@ export default function AdminPage() {
                     className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 p-3 rounded-lg flex flex-col items-center gap-2"
                   >
                     <Store className="w-5 h-5 text-zinc-300" />
-                    <span className="text-xs font-medium text-zinc-300">Manage Shops</span>
+                    <span className="text-xs font-medium text-zinc-300">{t("admin.manageShops")}</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("disputes")}
                     className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 p-3 rounded-lg flex flex-col items-center gap-2"
                   >
                     <AlertTriangle className="w-5 h-5 text-red-400" />
-                    <span className="text-xs font-medium text-red-400">Review Disputes</span>
+                    <span className="text-xs font-medium text-red-400">{t("admin.reviewDisputes")}</span>
                   </button>
                   <button className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 p-3 rounded-lg flex flex-col items-center gap-2">
                     <Settings className="w-5 h-5 text-zinc-300" />
-                    <span className="text-xs font-medium text-zinc-300">Config Fees</span>
+                    <span className="text-xs font-medium text-zinc-300">{t("admin.configFees")}</span>
                   </button>
                   <button className="bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 p-3 rounded-lg flex flex-col items-center gap-2">
                     <Ban className="w-5 h-5 text-red-500" />
-                    <span className="text-xs font-medium text-red-500">Ban User</span>
+                    <span className="text-xs font-medium text-red-500">{t("admin.banUser")}</span>
                   </button>
                 </div>
 

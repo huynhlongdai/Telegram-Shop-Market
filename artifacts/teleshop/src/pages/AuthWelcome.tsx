@@ -2,10 +2,12 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuthTelegram } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth";
+import { useTranslation } from "react-i18next";
 
 export default function AuthWelcome() {
   const [, setLocation] = useLocation();
   const { login } = useAuth();
+  const { t } = useTranslation();
   const { mutate: authTelegram, isPending } = useAuthTelegram();
 
   const handleDevLogin = () => {
@@ -29,7 +31,7 @@ export default function AuthWelcome() {
         
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">TeleShop</h1>
-          <p className="text-muted-foreground text-sm">The crypto-native marketplace inside Telegram</p>
+          <p className="text-muted-foreground text-sm">{t("auth.tagline")}</p>
         </div>
 
         <div className="w-full space-y-3 pt-8">
@@ -39,20 +41,20 @@ export default function AuthWelcome() {
             onClick={handleDevLogin}
             disabled={isPending}
           >
-            {isPending ? "Connecting..." : "Sign in with Telegram"}
+            {isPending ? t("auth.connecting") : t("auth.signIn")}
           </Button>
           <Button 
             variant="outline" 
             className="w-full h-12 rounded-full text-base border-border bg-transparent hover:bg-muted"
             onClick={() => setLocation("/")}
           >
-            Browse as Guest
+            {t("auth.browseGuest")}
           </Button>
         </div>
         
         <div className="pt-4">
           <Link href="/register-shop" className="text-sm text-primary hover:underline font-medium">
-            Open a Shop
+            {t("auth.openShop")}
           </Link>
         </div>
       </div>

@@ -15,6 +15,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
+import { useTranslation } from "react-i18next";
 
 async function apiFetch(path: string, token: string, opts: RequestInit = {}) {
   const res = await fetch(`/api${path}`, {
@@ -30,6 +31,7 @@ async function apiFetch(path: string, token: string, opts: RequestInit = {}) {
 }
 
 export default function WalletPage() {
+  const { t } = useTranslation();
   const { token } = useAuth();
   const queryClient = useQueryClient();
   const [selectedCurrency, setSelectedCurrency] = useState<"TON" | "USDT">("TON");
@@ -55,7 +57,7 @@ export default function WalletPage() {
         body: JSON.stringify({ amount, currency: selectedCurrency, toAddress }),
       }),
     onSuccess: () => {
-      toast({ title: "Withdrawal submitted", description: "Your request is being processed." });
+      toast({ title: t("wallet.withdrawSubmitted"), description: t("wallet.withdrawProcessing") });
       setAmount("");
       setToAddress("");
       queryClient.invalidateQueries({ queryKey: ["wallet"] });
@@ -75,7 +77,7 @@ export default function WalletPage() {
             <ArrowLeft size={24} />
           </button>
         </Link>
-        <h1 className="text-lg font-semibold tracking-wide text-gray-100">My Wallet</h1>
+        <h1 className="text-lg font-semibold tracking-wide text-gray-100">{t("wallet.title")}</h1>
         <button className="p-2 -mr-2 text-gray-300 hover:text-white rounded-full hover:bg-white/10">
           <ShieldCheck size={24} />
         </button>
@@ -85,7 +87,7 @@ export default function WalletPage() {
         <div className="px-4 py-6 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-[#1c1c1e] rounded-2xl p-4 border border-white/5">
-              <p className="text-xs text-gray-400 mb-1">Available Balance</p>
+              <p className="text-xs text-gray-400 mb-1">{t("wallet.availableBalance")}</p>
               <div className="flex items-baseline space-x-1 mb-1">
                 {balanceLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-[#0098EA]" />
@@ -100,12 +102,12 @@ export default function WalletPage() {
                 onClick={() => setSelectedCurrency("TON")}
                 className="w-full py-2 bg-[#0098EA]/10 hover:bg-[#0098EA]/20 text-[#0098EA] rounded-xl text-sm font-semibold transition-colors border border-[#0098EA]/20"
               >
-                Withdraw TON
+                {t("wallet.withdrawTon")}
               </button>
             </div>
 
             <div className="bg-[#1c1c1e] rounded-2xl p-4 border border-white/5">
-              <p className="text-xs text-gray-400 mb-1">Available Balance</p>
+              <p className="text-xs text-gray-400 mb-1">{t("wallet.availableBalance")}</p>
               <div className="flex items-baseline space-x-1 mb-1">
                 {balanceLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-[#26A17B]" />
@@ -120,7 +122,7 @@ export default function WalletPage() {
                 onClick={() => setSelectedCurrency("USDT")}
                 className="w-full py-2 bg-[#26A17B]/10 hover:bg-[#26A17B]/20 text-[#26A17B] rounded-xl text-sm font-semibold transition-colors border border-[#26A17B]/20"
               >
-                Withdraw USDT
+                {t("wallet.withdrawUsdt")}
               </button>
             </div>
           </div>
@@ -129,13 +131,13 @@ export default function WalletPage() {
             {balance?.escrowLocked && Number(balance.escrowLocked) > 0 && (
               <div className="flex items-center space-x-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 whitespace-nowrap">
                 <Lock size={14} className="text-amber-500" />
-                <span className="text-xs font-medium text-amber-500">Escrow locked: {Number(balance.escrowLocked).toFixed(2)} USDT</span>
+                <span className="text-xs font-medium text-amber-500">{t("wallet.escrowLocked", { amount: Number(balance.escrowLocked).toFixed(2) })}</span>
               </div>
             )}
             {balance?.pendingCommission && Number(balance.pendingCommission) > 0 && (
               <div className="flex items-center space-x-2 bg-purple-500/10 border border-purple-500/20 rounded-lg px-3 py-2 whitespace-nowrap">
                 <Clock size={14} className="text-purple-400" />
-                <span className="text-xs font-medium text-purple-400">Pending commission: {Number(balance.pendingCommission).toFixed(2)} USDT</span>
+                <span className="text-xs font-medium text-purple-400">{t("wallet.pendingCommission", { amount: Number(balance.pendingCommission).toFixed(2) })}</span>
               </div>
             )}
           </div>
@@ -143,7 +145,7 @@ export default function WalletPage() {
 
         <div className="px-4 mb-6">
           <div className="bg-[#1c1c1e] rounded-2xl p-5 border border-white/5">
-            <h2 className="text-base font-semibold text-white mb-4">Withdraw Funds</h2>
+            <h2 className="text-base font-semibold text-white mb-4">{t("wallet.withdrawFunds")}</h2>
 
             <div className="flex bg-[#2c2c2e] p-1 rounded-xl mb-5">
               {(["TON", "USDT"] as const).map((curr) => (
@@ -160,18 +162,18 @@ export default function WalletPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">Send to wallet</label>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">{t("wallet.sendToWallet")}</label>
               <input
                 type="text"
                 value={toAddress}
                 onChange={(e) => setToAddress(e.target.value)}
-                placeholder="Wallet address"
+                placeholder={t("wallet.walletAddress")}
                 className="w-full bg-[#0f0f11] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#0098EA]/50 font-mono"
               />
             </div>
 
             <div className="mb-5">
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">Amount ({selectedCurrency})</label>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">{t("wallet.amount", { currency: selectedCurrency })}</label>
               <div className="flex items-center bg-[#0f0f11] border border-white/10 rounded-xl px-3 py-2.5 focus-within:border-[#0098EA]/50">
                 <input
                   type="number"
@@ -185,7 +187,7 @@ export default function WalletPage() {
                   onClick={() => setAmount(balance?.balanceUsdt ?? "0")}
                   className="bg-white/10 hover:bg-white/20 text-xs font-semibold px-2 py-1 rounded text-white"
                 >
-                  Max
+                  {t("wallet.max")}
                 </button>
               </div>
             </div>
@@ -198,12 +200,12 @@ export default function WalletPage() {
                     <span className="text-gray-200">{amount} {selectedCurrency}</span>
                   </div>
                   <div className="flex justify-between text-gray-400">
-                    <span>Platform fee (0.5%)</span>
+                    <span>{t("wallet.platformFee")}</span>
                     <span className="text-gray-200">{(Number(amount) * 0.005).toFixed(4)} {selectedCurrency}</span>
                   </div>
                   <div className="h-px bg-white/10 my-1" />
                   <div className="flex justify-between text-gray-300 font-medium">
-                    <span>You receive</span>
+                    <span>{t("wallet.youReceive")}</span>
                     <span className="text-white font-bold">{(Number(amount) * 0.995).toFixed(4)} {selectedCurrency}</span>
                   </div>
                 </div>
@@ -216,25 +218,25 @@ export default function WalletPage() {
               className="w-full bg-[#0098EA] hover:bg-[#0088CC] disabled:opacity-50 text-white font-semibold py-3.5 rounded-xl shadow-[0_0_15px_rgba(0,152,234,0.3)] transition-all flex items-center justify-center gap-2"
             >
               {withdrawPending && <Loader2 className="w-4 h-4 animate-spin" />}
-              Confirm Withdraw
+              {t("wallet.confirmWithdraw")}
             </button>
 
             <div className="mt-4 flex items-start space-x-2 text-red-400/80 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
               <Info size={14} className="mt-0.5 shrink-0" />
-              <p className="text-[11px] font-medium leading-tight">Funds sent directly on-chain. Irreversible. Verify address before confirming.</p>
+              <p className="text-[11px] font-medium leading-tight">{t("wallet.warning")}</p>
             </div>
           </div>
         </div>
 
         <div className="px-4 mb-6">
-          <h3 className="text-sm font-semibold text-white mb-3">Recent Transactions</h3>
+          <h3 className="text-sm font-semibold text-white mb-3">{t("wallet.recentTransactions")}</h3>
           {txLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
             </div>
           ) : txs.length === 0 ? (
             <div className="bg-[#1c1c1e] rounded-2xl p-6 text-center text-gray-500 text-sm border border-white/5">
-              No transactions yet
+              {t("wallet.noTransactions")}
             </div>
           ) : (
             <div className="bg-[#1c1c1e] rounded-2xl overflow-hidden border border-white/5">
@@ -265,7 +267,7 @@ export default function WalletPage() {
               </div>
               {txData?.total > 10 && (
                 <button className="w-full p-3 text-xs font-medium text-gray-400 hover:text-white bg-white/5 flex items-center justify-center space-x-1">
-                  <span>View all transactions</span>
+                  <span>{t("wallet.viewAll")}</span>
                   <ChevronRight size={14} />
                 </button>
               )}
@@ -274,24 +276,24 @@ export default function WalletPage() {
         </div>
 
         <div className="px-4 mb-8">
-          <h3 className="text-sm font-semibold text-white mb-3">Wallet Security</h3>
+          <h3 className="text-sm font-semibold text-white mb-3">{t("wallet.walletSecurity")}</h3>
           <div className="bg-[#1c1c1e] rounded-2xl overflow-hidden border border-white/5 divide-y divide-white/5">
             <div className="flex items-center justify-between p-4">
               <div>
-                <p className="text-sm font-medium text-gray-200">2FA via Telegram</p>
+                <p className="text-sm font-medium text-gray-200">{t("wallet.twoFA")}</p>
                 <div className="flex items-center space-x-1 mt-0.5">
                   <CheckCircle2 size={12} className="text-[#26A17B]" />
-                  <span className="text-xs text-[#26A17B]">Enabled</span>
+                  <span className="text-xs text-[#26A17B]">{t("wallet.enabled")}</span>
                 </div>
               </div>
-              <button className="text-xs font-semibold text-[#0098EA] bg-[#0098EA]/10 px-3 py-1.5 rounded-lg">Manage</button>
+              <button className="text-xs font-semibold text-[#0098EA] bg-[#0098EA]/10 px-3 py-1.5 rounded-lg">{t("wallet.manage")}</button>
             </div>
             <div className="flex items-center justify-between p-4">
               <div>
-                <p className="text-sm font-medium text-gray-200">Daily limit</p>
+                <p className="text-sm font-medium text-gray-200">{t("wallet.dailyLimit")}</p>
                 <p className="text-xs text-gray-500 mt-0.5">500 USDT</p>
               </div>
-              <button className="text-xs font-semibold text-white bg-white/10 px-3 py-1.5 rounded-lg">Change</button>
+              <button className="text-xs font-semibold text-white bg-white/10 px-3 py-1.5 rounded-lg">{t("wallet.change")}</button>
             </div>
           </div>
         </div>

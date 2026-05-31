@@ -4,8 +4,10 @@ import { ArrowLeft, Calendar, Bell, Sparkles, X, Zap, Loader2 } from "lucide-rea
 import { useGetMyShop, useListProducts } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 export default function FlashSalePage() {
+  const { t } = useTranslation();
   const { token } = useAuth();
   const [notifyFollowers, setNotifyFollowers] = useState(true);
   const [featureMarketplace, setFeatureMarketplace] = useState(false);
@@ -75,19 +77,19 @@ export default function FlashSalePage() {
       <main className="p-4 space-y-5">
         <section className="bg-slate-900/50 border border-white/5 rounded-2xl p-4 space-y-4">
           <div>
-            <label className="text-xs text-slate-400 font-medium mb-1.5 block uppercase tracking-wider">Sale Name</label>
+            <label className="text-xs text-slate-400 font-medium mb-1.5 block uppercase tracking-wider">{t("flashSale.saleName")}</label>
             <input
               type="text"
               value={saleName}
               onChange={(e) => setSaleName(e.target.value)}
-              placeholder="e.g. Summer Clear-Out Sale"
+              placeholder={t("flashSale.saleNamePlaceholder")}
               className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-colors"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-slate-400 font-medium mb-1.5 block uppercase tracking-wider">Start</label>
+              <label className="text-xs text-slate-400 font-medium mb-1.5 block uppercase tracking-wider">{t("flashSale.start")}</label>
               <div className="bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
                 <input
@@ -99,7 +101,7 @@ export default function FlashSalePage() {
               </div>
             </div>
             <div>
-              <label className="text-xs text-slate-400 font-medium mb-1.5 block uppercase tracking-wider">End</label>
+              <label className="text-xs text-slate-400 font-medium mb-1.5 block uppercase tracking-wider">{t("flashSale.end")}</label>
               <div className="bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
                 <input
@@ -120,8 +122,8 @@ export default function FlashSalePage() {
                 <Bell className="w-4 h-4 text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-medium">Notify followers</p>
-                <p className="text-xs text-slate-400">Send push to followers</p>
+                <p className="text-sm font-medium">{t("flashSale.notifyFollowers")}</p>
+                <p className="text-xs text-slate-400">{t("flashSale.notifySubtext")}</p>
               </div>
             </div>
             <button
@@ -142,10 +144,10 @@ export default function FlashSalePage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium">Feature on Marketplace</p>
+                  <p className="text-sm font-medium">{t("flashSale.featureMarketplace")}</p>
                   <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-medium border border-purple-500/30">5 USDT/day</span>
                 </div>
-                <p className="text-xs text-slate-400">Boost visibility during sale</p>
+                <p className="text-xs text-slate-400">{t("flashSale.featureSubtext")}</p>
               </div>
             </div>
             <button
@@ -163,7 +165,7 @@ export default function FlashSalePage() {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-slate-300">
-              {Object.keys(selectedProducts).length} product{Object.keys(selectedProducts).length !== 1 ? "s" : ""} selected
+              {t("flashSale.productsSelected", { count: Object.keys(selectedProducts).length })}
             </h3>
           </div>
 

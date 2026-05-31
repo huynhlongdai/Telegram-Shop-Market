@@ -4,8 +4,10 @@ import { Search, Flame } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
+  const { t } = useTranslation();
   const { data: products, isLoading } = useListProducts();
 
   return (
@@ -16,7 +18,7 @@ export default function Home() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Search products..." className="pl-9 bg-card border-border rounded-full" />
+        <Input placeholder={t("home.searchPlaceholder")} className="pl-9 bg-card border-border rounded-full" />
       </div>
 
       <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-xl p-4 flex items-center gap-3">
@@ -24,13 +26,13 @@ export default function Home() {
           <Flame className="w-5 h-5 text-orange-500" />
         </div>
         <div>
-          <h3 className="font-medium text-orange-500">Flash Sale</h3>
-          <p className="text-xs text-muted-foreground">Up to 50% off premium assets</p>
+          <h3 className="font-medium text-orange-500">{t("home.flashSale")}</h3>
+          <p className="text-xs text-muted-foreground">{t("home.flashSaleSubtext")}</p>
         </div>
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-3">Trending Now</h2>
+        <h2 className="text-lg font-semibold mb-3">{t("home.trendingNow")}</h2>
         {isLoading ? (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map(i => (
@@ -56,7 +58,7 @@ export default function Home() {
             ))}
             {(!products || products.items.length === 0) && (
               <div className="col-span-2 text-center py-8 text-muted-foreground text-sm">
-                No products found
+                {t("home.noProducts")}
               </div>
             )}
           </div>

@@ -4,8 +4,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Package, ChevronRight, Clock, CheckCircle2, Truck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export default function OrderList() {
+  const { t } = useTranslation();
   const { data: orders, isLoading } = useListOrders();
 
   const getStatusIcon = (status: string) => {
@@ -26,10 +28,15 @@ export default function OrderList() {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    const key = `orders.status.${status}` as const;
+    return t(key, status);
+  };
+
   return (
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">My Orders</h1>
+        <h1 className="text-2xl font-bold">{t("orders.title")}</h1>
       </div>
 
       <div className="space-y-4">
@@ -43,19 +50,19 @@ export default function OrderList() {
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
               <Package className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="font-semibold text-lg">No orders yet</h3>
-            <p className="text-muted-foreground text-sm">When you place an order, it will appear here.</p>
-            <Link href="/" className="inline-block mt-4 text-primary font-medium">Start Shopping</Link>
+            <h3 className="font-semibold text-lg">{t("orders.noOrdersTitle")}</h3>
+            <p className="text-muted-foreground text-sm">{t("orders.noOrdersSubtext")}</p>
+            <Link href="/" className="inline-block mt-4 text-primary font-medium">{t("orders.startShopping")}</Link>
           </div>
         ) : (
           orders.items.map((order) => (
             <Link key={order.id} href={`/orders/${order.id}`} className="block">
               <div className="bg-card border border-border rounded-xl p-4 space-y-3 hover-elevate">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-muted-foreground">Order #{order.id}</span>
+                  <span className="text-sm font-medium text-muted-foreground">{t("orders.orderNumber", { id: order.id })}</span>
                   <Badge variant="outline" className={`capitalize flex items-center gap-1.5 ${getStatusColor(order.status)}`}>
                     {getStatusIcon(order.status)}
-                    {order.status}
+                    {getStatusLabel(order.status)}
                   </Badge>
                 </div>
                 
@@ -64,7 +71,7 @@ export default function OrderList() {
                     <Package className="w-6 h-6 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">Order Total: {formatPrice(order.totalAmount)} USDT</p>
+                    <p className="text-sm font-medium truncate">{t("orders.orderTotal", { amount: formatPrice(order.totalAmount) })}</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </p>

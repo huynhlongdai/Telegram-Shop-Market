@@ -1,8 +1,10 @@
 import { Link, useLocation } from "wouter";
 import { Home, ShoppingBag, ListOrdered, Share2, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const { t } = useTranslation();
 
   const showNav = location !== "/welcome";
 
@@ -15,11 +17,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         
         {showNav && (
           <nav className="absolute bottom-0 w-full h-16 bg-card border-t border-border flex items-center justify-around z-50">
-            <NavItem href="/" icon={Home} label="Home" active={location === "/"} />
-            <NavItem href="/shop" icon={ShoppingBag} label="Shop" active={location.startsWith("/shop")} />
-            <NavItem href="/orders" icon={ListOrdered} label="Orders" active={location.startsWith("/orders")} />
-            <NavItem href="/affiliate" icon={Share2} label="Affiliate" active={location.startsWith("/affiliate")} />
-            <NavItem href="/profile" icon={User} label="Profile" active={location.startsWith("/profile")} />
+            <NavItem href="/" icon={Home} label={t("nav.home")} active={location === "/"} />
+            <NavItem href="/shop" icon={ShoppingBag} label={t("nav.shop")} active={location.startsWith("/shop")} />
+            <NavItem href="/orders" icon={ListOrdered} label={t("nav.orders")} active={location.startsWith("/orders")} />
+            <NavItem href="/affiliate" icon={Share2} label={t("nav.affiliate")} active={location.startsWith("/affiliate")} />
+            <NavItem href="/profile" icon={User} label={t("nav.profile")} active={location.startsWith("/profile")} />
           </nav>
         )}
       </div>

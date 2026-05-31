@@ -11,12 +11,14 @@ import {
 } from "lucide-react";
 import { useListVouchers, useCreateVoucher } from "@workspace/api-client-react";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 function generateCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
 export default function VoucherPage() {
+  const { t } = useTranslation();
   const { data, isLoading, refetch } = useListVouchers({});
   const { mutate: createVoucher, isPending } = useCreateVoucher();
 
@@ -76,7 +78,7 @@ export default function VoucherPage() {
               <ArrowLeft className="h-5 w-5" />
             </button>
           </Link>
-          <h1 className="text-lg font-semibold tracking-tight">Vouchers & Coupons</h1>
+          <h1 className="text-lg font-semibold tracking-tight">{t("voucher.title")}</h1>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
@@ -92,7 +94,7 @@ export default function VoucherPage() {
           <div className="bg-slate-900 rounded-xl p-3 border border-slate-800 flex items-center justify-between text-xs text-slate-400">
             <div className="flex flex-col items-center">
               <span className="font-semibold text-slate-200">{vouchers.filter((v: any) => v.isActive).length}</span>
-              <span>Active</span>
+              <span>{t("voucher.active")}</span>
             </div>
             <div className="w-px h-6 bg-slate-700" />
             <div className="flex flex-col items-center">
@@ -116,7 +118,7 @@ export default function VoucherPage() {
             <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mx-auto">
               <Percent className="w-8 h-8 text-slate-600" />
             </div>
-            <p className="text-slate-400 text-sm">No vouchers yet</p>
+            <p className="text-slate-400 text-sm">{t("voucher.noVouchers")}</p>
             <button
               onClick={() => setShowForm(true)}
               className="bg-[#0088CC] text-white rounded-xl px-6 py-3 text-sm font-medium"
