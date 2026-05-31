@@ -2,21 +2,35 @@ openapi: 3.1.0
 info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: API specification
+  version: 1.0.0
+  description: TeleShop API — crypto marketplace for Telegram Mini Apps
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Telegram Mini App authentication
+  - name: users
+    description: User profile management
+  - name: shops
+    description: Shop management
+  - name: products
+    description: Product catalog
+  - name: orders
+    description: Order management
+  - name: vouchers
+    description: Voucher/coupon management
+  - name: affiliates
+    description: Affiliate & KOL program
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +38,876 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/telegram:
+    post:
+      operationId: authTelegram
+      tags: [auth]
+      summary: Authenticate via Telegram initData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelegramAuthInput"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Invalid initData
+
+  /users/me:
+    get:
+      operationId: getMe
+      tags: [users]
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+    patch:
+      operationId: updateMe
+      tags: [users]
+      summary: Update current user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /shops:
+    get:
+      operationId: listShops
+      tags: [shops]
+      summary: List all active shops (marketplace)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of shops
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopList"
+    post:
+      operationId: createShop
+      tags: [shops]
+      summary: Create a new shop
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopInput"
+      responses:
+        "201":
+          description: Created shop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shop"
+        "400":
+          description: Validation error
+        "409":
+          description: Slug already taken
+
+  /shops/me:
+    get:
+      operationId: getMyShop
+      tags: [shops]
+      summary: Get current user's shop
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Shop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shop"
+        "404":
+          description: No shop found
+
+  /shops/{shopId}:
+    get:
+      operationId: getShop
+      tags: [shops]
+      summary: Get shop by ID
+      parameters:
+        - in: path
+          name: shopId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Shop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shop"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateShop
+      tags: [shops]
+      summary: Update shop
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: shopId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopUpdate"
+      responses:
+        "200":
+          description: Updated shop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shop"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List products across all shops (marketplace feed)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: flashSale
+          schema: { type: boolean }
+        - in: query
+          name: shopId
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Product list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductList"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product in current user's shop
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{productId}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get product by ID
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List orders for current user (buyer or seller)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: role
+          schema:
+            type: string
+            enum: [buyer, seller]
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: limit
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Order list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderList"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Place a new order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Created order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get order by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Not found
+
+  /orders/{orderId}/status:
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      summary: Update order status (confirm, ship, complete, dispute)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusUpdate"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /vouchers/validate:
+    post:
+      operationId: validateVoucher
+      tags: [vouchers]
+      summary: Validate a voucher code before checkout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoucherValidateInput"
+      responses:
+        "200":
+          description: Voucher details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoucherValidateResult"
+        "404":
+          description: Invalid or expired voucher
+
+  /vouchers:
+    get:
+      operationId: listVouchers
+      tags: [vouchers]
+      summary: List vouchers for merchant's shop
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Voucher list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoucherList"
+    post:
+      operationId: createVoucher
+      tags: [vouchers]
+      summary: Create a voucher
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoucherInput"
+      responses:
+        "201":
+          description: Created voucher
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Voucher"
+
+  /affiliates/me:
+    get:
+      operationId: getMyAffiliate
+      tags: [affiliates]
+      summary: Get current user's affiliate profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Affiliate profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Affiliate"
+        "404":
+          description: Not enrolled
+    post:
+      operationId: enrollAffiliate
+      tags: [affiliates]
+      summary: Enroll in affiliate program
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Enrolled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Affiliate"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    TelegramAuthInput:
+      type: object
+      required: [initData]
+      properties:
+        initData:
+          type: string
+        referralCode:
+          type: ["string", "null"]
+
+    AuthResult:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, telegramId, role, createdAt]
+      properties:
+        id:
+          type: integer
+        telegramId:
+          type: string
+        username:
+          type: ["string", "null"]
+        firstName:
+          type: ["string", "null"]
+        lastName:
+          type: ["string", "null"]
+        photoUrl:
+          type: ["string", "null"]
+        role:
+          type: string
+        referralCode:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    UserUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+
+    Shop:
+      type: object
+      required: [id, ownerId, name, slug, plan, status, totalSales, createdAt]
+      properties:
+        id:
+          type: integer
+        ownerId:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        bannerUrl:
+          type: ["string", "null"]
+        plan:
+          type: string
+        status:
+          type: string
+        rating:
+          type: string
+        totalSales:
+          type: integer
+        walletAddress:
+          type: ["string", "null"]
+        telegramChannel:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    ShopList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Shop"
+        total:
+          type: integer
+
+    ShopInput:
+      type: object
+      required: [name, slug, plan]
+      properties:
+        name:
+          type: string
+          minLength: 2
+        slug:
+          type: string
+          minLength: 2
+        description:
+          type: string
+        plan:
+          type: string
+          enum: [starter, growth, pro]
+        walletAddress:
+          type: string
+        telegramChannel:
+          type: string
+
+    ShopUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        logoUrl:
+          type: string
+        bannerUrl:
+          type: string
+        walletAddress:
+          type: string
+        telegramChannel:
+          type: string
+        status:
+          type: string
+
+    Product:
+      type: object
+      required: [id, shopId, name, price, currency, stock, status, createdAt]
+      properties:
+        id:
+          type: integer
+        shopId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        price:
+          type: string
+        currency:
+          type: string
+        imageUrl:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        stock:
+          type: integer
+        status:
+          type: string
+        flashSalePrice:
+          type: ["string", "null"]
+        flashSaleEnd:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    ProductList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        total:
+          type: integer
+
+    ProductInput:
+      type: object
+      required: [name, price, currency, stock]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        price:
+          type: string
+        currency:
+          type: string
+          enum: [TON, USDT]
+        imageUrl:
+          type: string
+        category:
+          type: string
+        stock:
+          type: integer
+
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+        stock:
+          type: integer
+        status:
+          type: string
+        imageUrl:
+          type: string
+        category:
+          type: string
+        flashSalePrice:
+          type: string
+        flashSaleEnd:
+          type: string
+
+    Order:
+      type: object
+      required: [id, buyerId, shopId, productId, quantity, totalAmount, currency, status, createdAt]
+      properties:
+        id:
+          type: integer
+        buyerId:
+          type: integer
+        shopId:
+          type: integer
+        productId:
+          type: integer
+        quantity:
+          type: integer
+        totalAmount:
+          type: string
+        currency:
+          type: string
+        status:
+          type: string
+        txHash:
+          type: ["string", "null"]
+        escrowAddress:
+          type: ["string", "null"]
+        deliveryAddress:
+          type: ["string", "null"]
+        note:
+          type: ["string", "null"]
+        voucherCode:
+          type: ["string", "null"]
+        discountAmount:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    OrderList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        total:
+          type: integer
+
+    OrderInput:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId:
+          type: integer
+        quantity:
+          type: integer
+          minimum: 1
+        deliveryAddress:
+          type: string
+        note:
+          type: string
+        voucherCode:
+          type: string
+
+    OrderStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [confirmed, shipped, completed, disputed, cancelled]
+        txHash:
+          type: string
+
+    Voucher:
+      type: object
+      required: [id, code, discountType, discountValue, usedCount, isActive, createdAt]
+      properties:
+        id:
+          type: integer
+        shopId:
+          type: ["integer", "null"]
+        code:
+          type: string
+        discountType:
+          type: string
+        discountValue:
+          type: string
+        minOrderAmount:
+          type: ["string", "null"]
+        maxUses:
+          type: ["integer", "null"]
+        usedCount:
+          type: integer
+        expiresAt:
+          type: ["string", "null"]
+          format: date-time
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    VoucherList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Voucher"
+
+    VoucherInput:
+      type: object
+      required: [code, discountType, discountValue]
+      properties:
+        code:
+          type: string
+          minLength: 3
+        discountType:
+          type: string
+          enum: [percent, fixed]
+        discountValue:
+          type: string
+        minOrderAmount:
+          type: string
+        maxUses:
+          type: integer
+        expiresAt:
+          type: string
+
+    VoucherValidateInput:
+      type: object
+      required: [code, orderAmount]
+      properties:
+        code:
+          type: string
+        orderAmount:
+          type: string
+        shopId:
+          type: integer
+
+    VoucherValidateResult:
+      type: object
+      required: [valid, voucher]
+      properties:
+        valid:
+          type: boolean
+        voucher:
+          $ref: "#/components/schemas/Voucher"
+        discountAmount:
+          type: string
+        finalAmount:
+          type: string
+
+    Affiliate:
+      type: object
+      required: [id, userId, referralCode, tier, totalEarned, pendingPayout, totalReferrals, status, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        referralCode:
+          type: string
+        tier:
+          type: string
+        totalEarned:
+          type: string
+        pendingPayout:
+          type: string
+        totalReferrals:
+          type: integer
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

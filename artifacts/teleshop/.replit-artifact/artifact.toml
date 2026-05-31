@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/teleshop/"
+title = "TeleShop — Telegram Mini App"
+version = "1.0.0"
+id = "artifacts/teleshop"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/teleshop/" ]
+localPort = 18631
+
+[services.development]
+run = "pnpm --filter @workspace/teleshop run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/teleshop", "run", "build" ]
+publicDir = "artifacts/teleshop/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18631"
+BASE_PATH = "/teleshop/"
