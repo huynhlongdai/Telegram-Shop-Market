@@ -15,6 +15,8 @@ export const productsTable = pgTable("products", {
   status: text("status").notNull().default("active"),
   flashSalePrice: numeric("flash_sale_price", { precision: 18, scale: 6 }),
   flashSaleEnd: timestamp("flash_sale_end", { withTimezone: true }),
+  warrantyType: text("warranty_type").notNull().default("standard"),
+  escrowReleaseDays: integer("escrow_release_days").notNull().default(3),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

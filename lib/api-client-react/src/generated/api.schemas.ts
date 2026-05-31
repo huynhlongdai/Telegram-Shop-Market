@@ -62,6 +62,10 @@ export interface Shop {
   walletAddress?: string | null;
   /** @nullable */
   telegramChannel?: string | null;
+  /** @nullable */
+  botToken?: string | null;
+  /** @nullable */
+  notificationChatId?: string | null;
   createdAt: string;
 }
 
@@ -100,6 +104,21 @@ export interface ShopUpdate {
   status?: string;
 }
 
+export interface ShopBotUpdate {
+  /** @nullable */
+  botToken?: string | null;
+  /** @nullable */
+  notificationChatId?: string | null;
+}
+
+export type ProductWarrantyType = typeof ProductWarrantyType[keyof typeof ProductWarrantyType];
+
+
+export const ProductWarrantyType = {
+  standard: 'standard',
+  none: 'none',
+} as const;
+
 export interface Product {
   id: number;
   shopId: number;
@@ -118,6 +137,8 @@ export interface Product {
   flashSalePrice?: string | null;
   /** @nullable */
   flashSaleEnd?: string | null;
+  warrantyType: ProductWarrantyType;
+  escrowReleaseDays: number;
   createdAt: string;
 }
 
@@ -134,6 +155,14 @@ export const ProductInputCurrency = {
   USDT: 'USDT',
 } as const;
 
+export type ProductInputWarrantyType = typeof ProductInputWarrantyType[keyof typeof ProductInputWarrantyType];
+
+
+export const ProductInputWarrantyType = {
+  standard: 'standard',
+  none: 'none',
+} as const;
+
 export interface ProductInput {
   /** @minLength 1 */
   name: string;
@@ -143,7 +172,21 @@ export interface ProductInput {
   imageUrl?: string;
   category?: string;
   stock: number;
+  warrantyType?: ProductInputWarrantyType;
+  /**
+     * @minimum 1
+     * @maximum 30
+     */
+  escrowReleaseDays?: number;
 }
+
+export type ProductUpdateWarrantyType = typeof ProductUpdateWarrantyType[keyof typeof ProductUpdateWarrantyType];
+
+
+export const ProductUpdateWarrantyType = {
+  standard: 'standard',
+  none: 'none',
+} as const;
 
 export interface ProductUpdate {
   name?: string;
@@ -155,6 +198,12 @@ export interface ProductUpdate {
   category?: string;
   flashSalePrice?: string;
   flashSaleEnd?: string;
+  warrantyType?: ProductUpdateWarrantyType;
+  /**
+     * @minimum 1
+     * @maximum 30
+     */
+  escrowReleaseDays?: number;
 }
 
 export interface Order {
@@ -170,6 +219,14 @@ export interface Order {
   txHash?: string | null;
   /** @nullable */
   escrowAddress?: string | null;
+  escrowStatus: string;
+  /** @nullable */
+  escrowReleaseAt?: string | null;
+  warrantyType: string;
+  /** @nullable */
+  commissionPercent?: string | null;
+  /** @nullable */
+  commissionAmount?: string | null;
   /** @nullable */
   deliveryAddress?: string | null;
   /** @nullable */
@@ -276,6 +333,51 @@ export interface Affiliate {
   createdAt: string;
 }
 
+export interface CommissionTier {
+  id: number;
+  /** @nullable */
+  shopId?: number | null;
+  minOrderAmount: string;
+  /** @nullable */
+  maxOrderAmount?: string | null;
+  commissionPercent: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CommissionTierList {
+  items: CommissionTier[];
+}
+
+export interface CommissionTierInput {
+  shopId?: number;
+  minOrderAmount: string;
+  maxOrderAmount?: string;
+  commissionPercent: string;
+}
+
+export interface CommissionTierUpdate {
+  minOrderAmount?: string;
+  /** @nullable */
+  maxOrderAmount?: string | null;
+  commissionPercent?: string;
+  isActive?: boolean;
+}
+
+export interface CommissionPreviewInput {
+  orderAmount: string;
+  shopId?: number;
+}
+
+export interface CommissionPreviewResult {
+  orderAmount: string;
+  commissionPercent: string;
+  commissionAmount: string;
+  sellerReceives: string;
+  /** @nullable */
+  tierId?: number | null;
+}
+
 export type ListShopsParams = {
 page?: number;
 limit?: number;
@@ -306,4 +408,11 @@ export const ListOrdersRole = {
   buyer: 'buyer',
   seller: 'seller',
 } as const;
+
+export type ListCommissionTiersParams = {
+/**
+ * Filter by shop (omit for platform defaults)
+ */
+shopId?: number;
+};
 

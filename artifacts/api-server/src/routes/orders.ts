@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, ordersTable, productsTable, shopsTable, vouchersTable } from "@workspace/db";
-import { eq, and, or, sql } from "drizzle-orm";
+import { db, ordersTable, productsTable, shopsTable, vouchersTable, usersTable } from "@workspace/db";
+import { eq, and, sql } from "drizzle-orm";
 import {
   CreateOrderBody,
   GetOrderParams,
@@ -9,6 +9,8 @@ import {
   ListOrdersQueryParams,
 } from "@workspace/api-zod";
 import { requireAuth, type AuthRequest } from "../middlewares/requireAuth.js";
+import { resolveCommission } from "./commission.js";
+import { sendTelegramMessage, buildOrderNotification } from "../lib/telegram.js";
 
 const router: IRouter = Router();
 
@@ -97,6 +99,16 @@ router.post("/orders", requireAuth, async (req: AuthRequest, res): Promise<void>
     }
   }
 
+  const commission = await resolveCommission(totalAmount, product.shopId);
+
+  const warrantyType = product.warrantyType ?? "standard";
+  const escrowReleaseDays = product.escrowReleaseDays ?? 3;
+
+  let escrowReleaseAt: Date | null = null;
+  if (warrantyType === "none") {
+    escrowReleaseAt = new Date(Date.now() + escrowReleaseDays * 24 * 60 * 60 * 1000);
+  }
+
   const [order] = await db.insert(ordersTable).values({
     buyerId: req.userId!,
     shopId: product.shopId,
@@ -105,6 +117,11 @@ router.post("/orders", requireAuth, async (req: AuthRequest, res): Promise<void>
     totalAmount: String(totalAmount),
     currency: product.currency,
     status: "pending",
+    warrantyType,
+    escrowStatus: "holding",
+    escrowReleaseAt,
+    commissionPercent: String(commission.commissionPercent),
+    commissionAmount: commission.commissionAmount.toFixed(6),
     deliveryAddress: parsed.data.deliveryAddress ?? null,
     note: parsed.data.note ?? null,
     voucherCode: voucherCode ?? null,
@@ -114,6 +131,31 @@ router.post("/orders", requireAuth, async (req: AuthRequest, res): Promise<void>
   await db.update(productsTable)
     .set({ stock: product.stock - parsed.data.quantity })
     .where(eq(productsTable.id, product.id));
+
+  const [shop] = await db
+    .select({ botToken: shopsTable.botToken, notificationChatId: shopsTable.notificationChatId })
+    .from(shopsTable)
+    .where(eq(shopsTable.id, product.shopId));
+
+  if (shop?.botToken && shop?.notificationChatId) {
+    const [buyer] = await db.select({ username: usersTable.username }).from(usersTable)
+      .where(eq(usersTable.id, req.userId!));
+
+    const text = buildOrderNotification({
+      orderId: order.id,
+      productName: product.name,
+      quantity: parsed.data.quantity,
+      totalAmount: String(totalAmount),
+      currency: product.currency,
+      buyerUsername: buyer?.username,
+      warrantyType,
+      escrowReleaseDays,
+    });
+
+    setImmediate(() => {
+      sendTelegramMessage({ botToken: shop.botToken!, chatId: shop.notificationChatId!, text });
+    });
+  }
 
   res.status(201).json(order);
 });
@@ -166,8 +208,11 @@ router.patch("/orders/:orderId/status", requireAuth, async (req: AuthRequest, re
     return;
   }
 
-  const [shop] = await db.select({ ownerId: shopsTable.ownerId }).from(shopsTable)
-    .where(eq(shopsTable.id, order.shopId));
+  const [shop] = await db.select({
+    ownerId: shopsTable.ownerId,
+    botToken: shopsTable.botToken,
+    notificationChatId: shopsTable.notificationChatId,
+  }).from(shopsTable).where(eq(shopsTable.id, order.shopId));
 
   const isBuyer = order.buyerId === req.userId;
   const isSeller = shop?.ownerId === req.userId;
@@ -180,10 +225,35 @@ router.patch("/orders/:orderId/status", requireAuth, async (req: AuthRequest, re
   const updates: Record<string, unknown> = { status: parsed.data.status };
   if (parsed.data.txHash) updates.txHash = parsed.data.txHash;
 
+  if (parsed.data.status === "completed") {
+    updates.escrowStatus = "released";
+  } else if (parsed.data.status === "disputed") {
+    updates.escrowStatus = "disputed";
+  }
+
   const [updated] = await db.update(ordersTable)
     .set(updates)
     .where(eq(ordersTable.id, params.data.orderId))
     .returning();
+
+  if (shop?.botToken && shop?.notificationChatId) {
+    const [product] = await db.select({ name: productsTable.name }).from(productsTable)
+      .where(eq(productsTable.id, order.productId));
+
+    const text = buildOrderNotification({
+      orderId: order.id,
+      productName: product?.name ?? "Unknown",
+      quantity: order.quantity,
+      totalAmount: order.totalAmount,
+      currency: order.currency,
+      warrantyType: order.warrantyType,
+      status: parsed.data.status,
+    });
+
+    setImmediate(() => {
+      sendTelegramMessage({ botToken: shop.botToken!, chatId: shop.notificationChatId!, text });
+    });
+  }
 
   res.json(updated);
 });

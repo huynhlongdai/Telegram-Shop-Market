@@ -1,7 +1,14 @@
 import { Router, type IRouter } from "express";
 import { db, shopsTable } from "@workspace/db";
-import { eq, ilike, and, or, sql } from "drizzle-orm";
-import { CreateShopBody, UpdateShopBody, GetShopParams, UpdateShopParams, ListShopsQueryParams } from "@workspace/api-zod";
+import { eq, ilike, and, sql } from "drizzle-orm";
+import {
+  CreateShopBody,
+  UpdateShopBody,
+  GetShopParams,
+  UpdateShopParams,
+  ListShopsQueryParams,
+  UpdateShopBotBody,
+} from "@workspace/api-zod";
 import { requireAuth, type AuthRequest } from "../middlewares/requireAuth.js";
 
 const router: IRouter = Router();
@@ -62,6 +69,30 @@ router.get("/shops/me", requireAuth, async (req: AuthRequest, res): Promise<void
     return;
   }
   res.json(shop);
+});
+
+router.patch("/shops/me/bot", requireAuth, async (req: AuthRequest, res): Promise<void> => {
+  const parsed = UpdateShopBotBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const [shop] = await db.select().from(shopsTable).where(eq(shopsTable.ownerId, req.userId!));
+  if (!shop) {
+    res.status(404).json({ error: "No shop found" });
+    return;
+  }
+
+  const [updated] = await db.update(shopsTable)
+    .set({
+      botToken: parsed.data.botToken ?? null,
+      notificationChatId: parsed.data.notificationChatId ?? null,
+    })
+    .where(eq(shopsTable.id, shop.id))
+    .returning();
+
+  res.json(updated);
 });
 
 router.get("/shops/:shopId", async (req, res): Promise<void> => {

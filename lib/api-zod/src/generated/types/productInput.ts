@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { ProductInputCurrency } from './productInputCurrency';
+import type { ProductInputWarrantyType } from './productInputWarrantyType';
 
 export interface ProductInput {
   /** @minLength 1 */
@@ -16,4 +17,10 @@ export interface ProductInput {
   imageUrl?: string;
   category?: string;
   stock: number;
+  warrantyType?: ProductInputWarrantyType;
+  /**
+     * @minimum 1
+     * @maximum 30
+     */
+  escrowReleaseDays?: number;
 }

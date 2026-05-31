@@ -19,6 +19,14 @@ export interface Order {
   txHash?: string | null;
   /** @nullable */
   escrowAddress?: string | null;
+  escrowStatus: string;
+  /** @nullable */
+  escrowReleaseAt?: Date | null;
+  warrantyType: string;
+  /** @nullable */
+  commissionPercent?: string | null;
+  /** @nullable */
+  commissionAmount?: string | null;
   /** @nullable */
   deliveryAddress?: string | null;
   /** @nullable */

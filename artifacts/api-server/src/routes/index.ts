@@ -7,6 +7,7 @@ import productsRouter from "./products.js";
 import ordersRouter from "./orders.js";
 import vouchersRouter from "./vouchers.js";
 import affiliatesRouter from "./affiliates.js";
+import commissionRouter from "./commission.js";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(productsRouter);
 router.use(ordersRouter);
 router.use(vouchersRouter);
 router.use(affiliatesRouter);
+router.use(commissionRouter);
 
 export default router;

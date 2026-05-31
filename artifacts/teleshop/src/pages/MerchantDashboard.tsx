@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useGetMyShop } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Package, TrendingUp, Users, ShoppingBag } from "lucide-react";
+import { Package, TrendingUp, ShoppingBag, Settings } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 const data = [
@@ -67,6 +67,10 @@ export default function MerchantDashboard() {
           <Link href="/dashboard/orders" className="bg-card border border-border p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover-elevate">
             <ShoppingBag className="w-6 h-6 text-primary" />
             <span className="text-sm font-medium">Orders</span>
+          </Link>
+          <Link href="/dashboard/settings" className="bg-card border border-border p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover-elevate col-span-2">
+            <Settings className="w-6 h-6 text-primary" />
+            <span className="text-sm font-medium">Bot & Commission Settings</span>
           </Link>
         </div>
       </div>

@@ -17,6 +17,7 @@ import ProductList from "@/pages/ProductList";
 import OrderManagement from "@/pages/OrderManagement";
 import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import UserProfile from "@/pages/UserProfile";
+import ShopSettings from "@/pages/ShopSettings";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/Layout";
 
@@ -43,6 +44,7 @@ function Router() {
         <Route path="/dashboard/orders" component={OrderManagement} />
         <Route path="/affiliate" component={AffiliateDashboard} />
         <Route path="/profile" component={UserProfile} />
+        <Route path="/dashboard/settings" component={ShopSettings} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

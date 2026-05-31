@@ -25,5 +25,9 @@ export interface Shop {
   walletAddress?: string | null;
   /** @nullable */
   telegramChannel?: string | null;
+  /** @nullable */
+  botToken?: string | null;
+  /** @nullable */
+  notificationChatId?: string | null;
   createdAt: Date;
 }

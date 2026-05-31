@@ -2,7 +2,7 @@ import { useGetProduct } from "@workspace/api-client-react";
 import { useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Store, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Store, ShieldCheck, ShieldOff, Clock } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 export default function ProductDetail() {
@@ -64,10 +64,26 @@ export default function ProductDetail() {
           </p>
         </div>
         
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
-          <ShieldCheck className="w-4 h-4 text-primary" />
-          <span>Secure crypto payment via Telegram Wallet</span>
-        </div>
+        {product.warrantyType === "none" ? (
+          <div className="flex items-start gap-2 bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl">
+            <ShieldOff className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-orange-500">No Warranty</p>
+              <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                Funds auto-released to seller after {product.escrowReleaseDays} day(s)
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 p-3 rounded-xl border border-primary/10">
+            <ShieldCheck className="w-4 h-4 text-primary flex-shrink-0" />
+            <div>
+              <p className="text-xs font-medium text-foreground">Buyer Protection</p>
+              <p className="text-xs text-muted-foreground">Funds held in escrow until you confirm delivery</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 max-w-[390px] mx-auto p-4 bg-background/80 backdrop-blur-xl border-t border-border z-50">

@@ -24,6 +24,8 @@ tags:
     description: Voucher/coupon management
   - name: affiliates
     description: Affiliate & KOL program
+  - name: commission
+    description: Commission tier management
 
 paths:
   /healthz:
@@ -155,6 +157,29 @@ paths:
       responses:
         "200":
           description: Shop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shop"
+        "404":
+          description: No shop found
+
+  /shops/me/bot:
+    patch:
+      operationId: updateShopBot
+      tags: [shops]
+      summary: Update shop bot settings (Telegram bot token + notification chat ID)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopBotUpdate"
+      responses:
+        "200":
+          description: Updated shop
           content:
             application/json:
               schema:
@@ -497,6 +522,106 @@ paths:
               schema:
                 $ref: "#/components/schemas/Affiliate"
 
+  /commission/tiers:
+    get:
+      operationId: listCommissionTiers
+      tags: [commission]
+      summary: List commission tiers (platform default or shop-specific)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: shopId
+          schema: { type: integer }
+          description: Filter by shop (omit for platform defaults)
+      responses:
+        "200":
+          description: Commission tiers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommissionTierList"
+    post:
+      operationId: createCommissionTier
+      tags: [commission]
+      summary: Create a commission tier (admin or shop owner)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommissionTierInput"
+      responses:
+        "201":
+          description: Created tier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommissionTier"
+
+  /commission/tiers/{tierId}:
+    patch:
+      operationId: updateCommissionTier
+      tags: [commission]
+      summary: Update a commission tier
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: tierId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommissionTierUpdate"
+      responses:
+        "200":
+          description: Updated tier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommissionTier"
+    delete:
+      operationId: deleteCommissionTier
+      tags: [commission]
+      summary: Delete a commission tier
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: tierId
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /commission/preview:
+    post:
+      operationId: previewCommission
+      tags: [commission]
+      summary: Preview commission amount for a given order amount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommissionPreviewInput"
+      responses:
+        "200":
+          description: Commission preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommissionPreviewResult"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -594,6 +719,10 @@ components:
           type: ["string", "null"]
         telegramChannel:
           type: ["string", "null"]
+        botToken:
+          type: ["string", "null"]
+        notificationChatId:
+          type: ["string", "null"]
         createdAt:
           type: string
           format: date-time
@@ -647,9 +776,17 @@ components:
         status:
           type: string
 
+    ShopBotUpdate:
+      type: object
+      properties:
+        botToken:
+          type: ["string", "null"]
+        notificationChatId:
+          type: ["string", "null"]
+
     Product:
       type: object
-      required: [id, shopId, name, price, currency, stock, status, createdAt]
+      required: [id, shopId, name, price, currency, stock, status, warrantyType, escrowReleaseDays, createdAt]
       properties:
         id:
           type: integer
@@ -676,6 +813,11 @@ components:
         flashSaleEnd:
           type: ["string", "null"]
           format: date-time
+        warrantyType:
+          type: string
+          enum: [standard, none]
+        escrowReleaseDays:
+          type: integer
         createdAt:
           type: string
           format: date-time
@@ -711,6 +853,13 @@ components:
           type: string
         stock:
           type: integer
+        warrantyType:
+          type: string
+          enum: [standard, none]
+        escrowReleaseDays:
+          type: integer
+          minimum: 1
+          maximum: 30
 
     ProductUpdate:
       type: object
@@ -733,10 +882,17 @@ components:
           type: string
         flashSaleEnd:
           type: string
+        warrantyType:
+          type: string
+          enum: [standard, none]
+        escrowReleaseDays:
+          type: integer
+          minimum: 1
+          maximum: 30
 
     Order:
       type: object
-      required: [id, buyerId, shopId, productId, quantity, totalAmount, currency, status, createdAt]
+      required: [id, buyerId, shopId, productId, quantity, totalAmount, currency, status, warrantyType, escrowStatus, createdAt]
       properties:
         id:
           type: integer
@@ -757,6 +913,17 @@ components:
         txHash:
           type: ["string", "null"]
         escrowAddress:
+          type: ["string", "null"]
+        escrowStatus:
+          type: string
+        escrowReleaseAt:
+          type: ["string", "null"]
+          format: date-time
+        warrantyType:
+          type: string
+        commissionPercent:
+          type: ["string", "null"]
+        commissionAmount:
           type: ["string", "null"]
         deliveryAddress:
           type: ["string", "null"]
@@ -911,3 +1078,81 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    CommissionTier:
+      type: object
+      required: [id, minOrderAmount, commissionPercent, isActive, createdAt]
+      properties:
+        id:
+          type: integer
+        shopId:
+          type: ["integer", "null"]
+        minOrderAmount:
+          type: string
+        maxOrderAmount:
+          type: ["string", "null"]
+        commissionPercent:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    CommissionTierList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommissionTier"
+
+    CommissionTierInput:
+      type: object
+      required: [minOrderAmount, commissionPercent]
+      properties:
+        shopId:
+          type: integer
+        minOrderAmount:
+          type: string
+        maxOrderAmount:
+          type: string
+        commissionPercent:
+          type: string
+
+    CommissionTierUpdate:
+      type: object
+      properties:
+        minOrderAmount:
+          type: string
+        maxOrderAmount:
+          type: ["string", "null"]
+        commissionPercent:
+          type: string
+        isActive:
+          type: boolean
+
+    CommissionPreviewInput:
+      type: object
+      required: [orderAmount]
+      properties:
+        orderAmount:
+          type: string
+        shopId:
+          type: integer
+
+    CommissionPreviewResult:
+      type: object
+      required: [orderAmount, commissionPercent, commissionAmount, sellerReceives]
+      properties:
+        orderAmount:
+          type: string
+        commissionPercent:
+          type: string
+        commissionAmount:
+          type: string
+        sellerReceives:
+          type: string
+        tierId:
+          type: ["integer", "null"]

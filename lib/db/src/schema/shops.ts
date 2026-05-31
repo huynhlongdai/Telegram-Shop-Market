@@ -16,6 +16,8 @@ export const shopsTable = pgTable("shops", {
   totalSales: integer("total_sales").notNull().default(0),
   walletAddress: text("wallet_address"),
   telegramChannel: text("telegram_channel"),
+  botToken: text("bot_token"),
+  notificationChatId: text("notification_chat_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

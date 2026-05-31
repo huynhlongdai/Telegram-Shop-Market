@@ -22,7 +22,14 @@ import type {
 import type {
   Affiliate,
   AuthResult,
+  CommissionPreviewInput,
+  CommissionPreviewResult,
+  CommissionTier,
+  CommissionTierInput,
+  CommissionTierList,
+  CommissionTierUpdate,
   HealthStatus,
+  ListCommissionTiersParams,
   ListOrdersParams,
   ListProductsParams,
   ListShopsParams,
@@ -35,6 +42,7 @@ import type {
   ProductList,
   ProductUpdate,
   Shop,
+  ShopBotUpdate,
   ShopInput,
   ShopList,
   ShopUpdate,
@@ -587,6 +595,77 @@ export function useGetMyShop<TData = Awaited<ReturnType<typeof getMyShop>>, TErr
 
 
 
+
+export const getUpdateShopBotUrl = () => {
+
+
+
+
+  return `/api/shops/me/bot`
+}
+
+/**
+ * @summary Update shop bot settings (Telegram bot token + notification chat ID)
+ */
+export const updateShopBot = async (shopBotUpdate: ShopBotUpdate, options?: RequestInit): Promise<Shop> => {
+
+  return customFetch<Shop>(getUpdateShopBotUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      shopBotUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateShopBotMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateShopBot>>, TError,{data: BodyType<ShopBotUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateShopBot>>, TError,{data: BodyType<ShopBotUpdate>}, TContext> => {
+
+const mutationKey = ['updateShopBot'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateShopBot>>, {data: BodyType<ShopBotUpdate>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateShopBot(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateShopBotMutationResult = NonNullable<Awaited<ReturnType<typeof updateShopBot>>>
+    export type UpdateShopBotMutationBody = BodyType<ShopBotUpdate>
+    export type UpdateShopBotMutationError = ErrorType<void>
+
+    /**
+ * @summary Update shop bot settings (Telegram bot token + notification chat ID)
+ */
+export const useUpdateShopBot = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateShopBot>>, TError,{data: BodyType<ShopBotUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateShopBot>>,
+        TError,
+        {data: BodyType<ShopBotUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateShopBotMutationOptions(options));
+    }
 
 export const getGetShopUrl = (shopId: number,) => {
 
@@ -1779,5 +1858,373 @@ export const useEnrollAffiliate = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getEnrollAffiliateMutationOptions(options));
+    }
+
+export const getListCommissionTiersUrl = (params?: ListCommissionTiersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/commission/tiers?${stringifiedParams}` : `/api/commission/tiers`
+}
+
+/**
+ * @summary List commission tiers (platform default or shop-specific)
+ */
+export const listCommissionTiers = async (params?: ListCommissionTiersParams, options?: RequestInit): Promise<CommissionTierList> => {
+
+  return customFetch<CommissionTierList>(getListCommissionTiersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCommissionTiersQueryKey = (params?: ListCommissionTiersParams,) => {
+    return [
+    `/api/commission/tiers`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListCommissionTiersQueryOptions = <TData = Awaited<ReturnType<typeof listCommissionTiers>>, TError = ErrorType<unknown>>(params?: ListCommissionTiersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCommissionTiers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCommissionTiersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCommissionTiers>>> = ({ signal }) => listCommissionTiers(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCommissionTiers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListCommissionTiersQueryResult = NonNullable<Awaited<ReturnType<typeof listCommissionTiers>>>
+export type ListCommissionTiersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List commission tiers (platform default or shop-specific)
+ */
+
+export function useListCommissionTiers<TData = Awaited<ReturnType<typeof listCommissionTiers>>, TError = ErrorType<unknown>>(
+ params?: ListCommissionTiersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCommissionTiers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListCommissionTiersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateCommissionTierUrl = () => {
+
+
+
+
+  return `/api/commission/tiers`
+}
+
+/**
+ * @summary Create a commission tier (admin or shop owner)
+ */
+export const createCommissionTier = async (commissionTierInput: CommissionTierInput, options?: RequestInit): Promise<CommissionTier> => {
+
+  return customFetch<CommissionTier>(getCreateCommissionTierUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      commissionTierInput,)
+  }
+);}
+
+
+
+
+export const getCreateCommissionTierMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCommissionTier>>, TError,{data: BodyType<CommissionTierInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCommissionTier>>, TError,{data: BodyType<CommissionTierInput>}, TContext> => {
+
+const mutationKey = ['createCommissionTier'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCommissionTier>>, {data: BodyType<CommissionTierInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCommissionTier(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCommissionTierMutationResult = NonNullable<Awaited<ReturnType<typeof createCommissionTier>>>
+    export type CreateCommissionTierMutationBody = BodyType<CommissionTierInput>
+    export type CreateCommissionTierMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a commission tier (admin or shop owner)
+ */
+export const useCreateCommissionTier = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCommissionTier>>, TError,{data: BodyType<CommissionTierInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCommissionTier>>,
+        TError,
+        {data: BodyType<CommissionTierInput>},
+        TContext
+      > => {
+      return useMutation(getCreateCommissionTierMutationOptions(options));
+    }
+
+export const getUpdateCommissionTierUrl = (tierId: number,) => {
+
+
+
+
+  return `/api/commission/tiers/${tierId}`
+}
+
+/**
+ * @summary Update a commission tier
+ */
+export const updateCommissionTier = async (tierId: number,
+    commissionTierUpdate: CommissionTierUpdate, options?: RequestInit): Promise<CommissionTier> => {
+
+  return customFetch<CommissionTier>(getUpdateCommissionTierUrl(tierId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      commissionTierUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateCommissionTierMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCommissionTier>>, TError,{tierId: number;data: BodyType<CommissionTierUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCommissionTier>>, TError,{tierId: number;data: BodyType<CommissionTierUpdate>}, TContext> => {
+
+const mutationKey = ['updateCommissionTier'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCommissionTier>>, {tierId: number;data: BodyType<CommissionTierUpdate>}> = (props) => {
+          const {tierId,data} = props ?? {};
+
+          return  updateCommissionTier(tierId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCommissionTierMutationResult = NonNullable<Awaited<ReturnType<typeof updateCommissionTier>>>
+    export type UpdateCommissionTierMutationBody = BodyType<CommissionTierUpdate>
+    export type UpdateCommissionTierMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update a commission tier
+ */
+export const useUpdateCommissionTier = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCommissionTier>>, TError,{tierId: number;data: BodyType<CommissionTierUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateCommissionTier>>,
+        TError,
+        {tierId: number;data: BodyType<CommissionTierUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateCommissionTierMutationOptions(options));
+    }
+
+export const getDeleteCommissionTierUrl = (tierId: number,) => {
+
+
+
+
+  return `/api/commission/tiers/${tierId}`
+}
+
+/**
+ * @summary Delete a commission tier
+ */
+export const deleteCommissionTier = async (tierId: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteCommissionTierUrl(tierId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteCommissionTierMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCommissionTier>>, TError,{tierId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteCommissionTier>>, TError,{tierId: number}, TContext> => {
+
+const mutationKey = ['deleteCommissionTier'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteCommissionTier>>, {tierId: number}> = (props) => {
+          const {tierId} = props ?? {};
+
+          return  deleteCommissionTier(tierId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteCommissionTierMutationResult = NonNullable<Awaited<ReturnType<typeof deleteCommissionTier>>>
+
+    export type DeleteCommissionTierMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a commission tier
+ */
+export const useDeleteCommissionTier = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCommissionTier>>, TError,{tierId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteCommissionTier>>,
+        TError,
+        {tierId: number},
+        TContext
+      > => {
+      return useMutation(getDeleteCommissionTierMutationOptions(options));
+    }
+
+export const getPreviewCommissionUrl = () => {
+
+
+
+
+  return `/api/commission/preview`
+}
+
+/**
+ * @summary Preview commission amount for a given order amount
+ */
+export const previewCommission = async (commissionPreviewInput: CommissionPreviewInput, options?: RequestInit): Promise<CommissionPreviewResult> => {
+
+  return customFetch<CommissionPreviewResult>(getPreviewCommissionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      commissionPreviewInput,)
+  }
+);}
+
+
+
+
+export const getPreviewCommissionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof previewCommission>>, TError,{data: BodyType<CommissionPreviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof previewCommission>>, TError,{data: BodyType<CommissionPreviewInput>}, TContext> => {
+
+const mutationKey = ['previewCommission'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof previewCommission>>, {data: BodyType<CommissionPreviewInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  previewCommission(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PreviewCommissionMutationResult = NonNullable<Awaited<ReturnType<typeof previewCommission>>>
+    export type PreviewCommissionMutationBody = BodyType<CommissionPreviewInput>
+    export type PreviewCommissionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Preview commission amount for a given order amount
+ */
+export const usePreviewCommission = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof previewCommission>>, TError,{data: BodyType<CommissionPreviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof previewCommission>>,
+        TError,
+        {data: BodyType<CommissionPreviewInput>},
+        TContext
+      > => {
+      return useMutation(getPreviewCommissionMutationOptions(options));
     }
 

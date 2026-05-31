@@ -5,6 +5,7 @@
  * TeleShop API — crypto marketplace for Telegram Mini Apps
  * OpenAPI spec version: 1.0.0
  */
+import type { ProductWarrantyType } from './productWarrantyType';
 
 export interface Product {
   id: number;
@@ -24,5 +25,7 @@ export interface Product {
   flashSalePrice?: string | null;
   /** @nullable */
   flashSaleEnd?: Date | null;
+  warrantyType: ProductWarrantyType;
+  escrowReleaseDays: number;
   createdAt: Date;
 }

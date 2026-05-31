@@ -103,6 +103,8 @@ export const ListShopsResponse = zod.object({
   "totalSales": zod.number(),
   "walletAddress": zod.string().nullish(),
   "telegramChannel": zod.string().nullish(),
+  "botToken": zod.string().nullish(),
+  "notificationChatId": zod.string().nullish(),
   "createdAt": zod.coerce.date()
 })),
   "total": zod.number()
@@ -145,6 +147,36 @@ export const GetMyShopResponse = zod.object({
   "totalSales": zod.number(),
   "walletAddress": zod.string().nullish(),
   "telegramChannel": zod.string().nullish(),
+  "botToken": zod.string().nullish(),
+  "notificationChatId": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update shop bot settings (Telegram bot token + notification chat ID)
+ */
+export const UpdateShopBotBody = zod.object({
+  "botToken": zod.string().nullish(),
+  "notificationChatId": zod.string().nullish()
+})
+
+export const UpdateShopBotResponse = zod.object({
+  "id": zod.number(),
+  "ownerId": zod.number(),
+  "name": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string().nullish(),
+  "logoUrl": zod.string().nullish(),
+  "bannerUrl": zod.string().nullish(),
+  "plan": zod.string(),
+  "status": zod.string(),
+  "rating": zod.string().optional(),
+  "totalSales": zod.number(),
+  "walletAddress": zod.string().nullish(),
+  "telegramChannel": zod.string().nullish(),
+  "botToken": zod.string().nullish(),
+  "notificationChatId": zod.string().nullish(),
   "createdAt": zod.coerce.date()
 })
 
@@ -170,6 +202,8 @@ export const GetShopResponse = zod.object({
   "totalSales": zod.number(),
   "walletAddress": zod.string().nullish(),
   "telegramChannel": zod.string().nullish(),
+  "botToken": zod.string().nullish(),
+  "notificationChatId": zod.string().nullish(),
   "createdAt": zod.coerce.date()
 })
 
@@ -205,6 +239,8 @@ export const UpdateShopResponse = zod.object({
   "totalSales": zod.number(),
   "walletAddress": zod.string().nullish(),
   "telegramChannel": zod.string().nullish(),
+  "botToken": zod.string().nullish(),
+  "notificationChatId": zod.string().nullish(),
   "createdAt": zod.coerce.date()
 })
 
@@ -235,6 +271,8 @@ export const ListProductsResponse = zod.object({
   "status": zod.string(),
   "flashSalePrice": zod.string().nullish(),
   "flashSaleEnd": zod.coerce.date().nullish(),
+  "warrantyType": zod.enum(['standard', 'none']),
+  "escrowReleaseDays": zod.number(),
   "createdAt": zod.coerce.date()
 })),
   "total": zod.number()
@@ -245,6 +283,8 @@ export const ListProductsResponse = zod.object({
  * @summary Create a product in current user's shop
  */
 
+export const createProductBodyEscrowReleaseDaysMax = 30;
+
 
 
 export const CreateProductBody = zod.object({
@@ -254,7 +294,9 @@ export const CreateProductBody = zod.object({
   "currency": zod.enum(['TON', 'USDT']),
   "imageUrl": zod.string().optional(),
   "category": zod.string().optional(),
-  "stock": zod.number()
+  "stock": zod.number(),
+  "warrantyType": zod.enum(['standard', 'none']).optional(),
+  "escrowReleaseDays": zod.number().min(1).max(createProductBodyEscrowReleaseDaysMax).optional()
 })
 
 
@@ -278,6 +320,8 @@ export const GetProductResponse = zod.object({
   "status": zod.string(),
   "flashSalePrice": zod.string().nullish(),
   "flashSaleEnd": zod.coerce.date().nullish(),
+  "warrantyType": zod.enum(['standard', 'none']),
+  "escrowReleaseDays": zod.number(),
   "createdAt": zod.coerce.date()
 })
 
@@ -289,6 +333,10 @@ export const UpdateProductParams = zod.object({
   "productId": zod.coerce.number()
 })
 
+export const updateProductBodyEscrowReleaseDaysMax = 30;
+
+
+
 export const UpdateProductBody = zod.object({
   "name": zod.string().optional(),
   "description": zod.string().optional(),
@@ -298,7 +346,9 @@ export const UpdateProductBody = zod.object({
   "imageUrl": zod.string().optional(),
   "category": zod.string().optional(),
   "flashSalePrice": zod.string().optional(),
-  "flashSaleEnd": zod.string().optional()
+  "flashSaleEnd": zod.string().optional(),
+  "warrantyType": zod.enum(['standard', 'none']).optional(),
+  "escrowReleaseDays": zod.number().min(1).max(updateProductBodyEscrowReleaseDaysMax).optional()
 })
 
 export const UpdateProductResponse = zod.object({
@@ -314,6 +364,8 @@ export const UpdateProductResponse = zod.object({
   "status": zod.string(),
   "flashSalePrice": zod.string().nullish(),
   "flashSaleEnd": zod.coerce.date().nullish(),
+  "warrantyType": zod.enum(['standard', 'none']),
+  "escrowReleaseDays": zod.number(),
   "createdAt": zod.coerce.date()
 })
 
@@ -348,6 +400,11 @@ export const ListOrdersResponse = zod.object({
   "status": zod.string(),
   "txHash": zod.string().nullish(),
   "escrowAddress": zod.string().nullish(),
+  "escrowStatus": zod.string(),
+  "escrowReleaseAt": zod.coerce.date().nullish(),
+  "warrantyType": zod.string(),
+  "commissionPercent": zod.string().nullish(),
+  "commissionAmount": zod.string().nullish(),
   "deliveryAddress": zod.string().nullish(),
   "note": zod.string().nullish(),
   "voucherCode": zod.string().nullish(),
@@ -391,6 +448,11 @@ export const GetOrderResponse = zod.object({
   "status": zod.string(),
   "txHash": zod.string().nullish(),
   "escrowAddress": zod.string().nullish(),
+  "escrowStatus": zod.string(),
+  "escrowReleaseAt": zod.coerce.date().nullish(),
+  "warrantyType": zod.string(),
+  "commissionPercent": zod.string().nullish(),
+  "commissionAmount": zod.string().nullish(),
   "deliveryAddress": zod.string().nullish(),
   "note": zod.string().nullish(),
   "voucherCode": zod.string().nullish(),
@@ -422,6 +484,11 @@ export const UpdateOrderStatusResponse = zod.object({
   "status": zod.string(),
   "txHash": zod.string().nullish(),
   "escrowAddress": zod.string().nullish(),
+  "escrowStatus": zod.string(),
+  "escrowReleaseAt": zod.coerce.date().nullish(),
+  "warrantyType": zod.string(),
+  "commissionPercent": zod.string().nullish(),
+  "commissionAmount": zod.string().nullish(),
   "deliveryAddress": zod.string().nullish(),
   "note": zod.string().nullish(),
   "voucherCode": zod.string().nullish(),
@@ -509,6 +576,87 @@ export const GetMyAffiliateResponse = zod.object({
   "totalReferrals": zod.number(),
   "status": zod.string(),
   "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List commission tiers (platform default or shop-specific)
+ */
+export const ListCommissionTiersQueryParams = zod.object({
+  "shopId": zod.coerce.number().optional().describe('Filter by shop (omit for platform defaults)')
+})
+
+export const ListCommissionTiersResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number(),
+  "shopId": zod.number().nullish(),
+  "minOrderAmount": zod.string(),
+  "maxOrderAmount": zod.string().nullish(),
+  "commissionPercent": zod.string(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Create a commission tier (admin or shop owner)
+ */
+export const CreateCommissionTierBody = zod.object({
+  "shopId": zod.number().optional(),
+  "minOrderAmount": zod.string(),
+  "maxOrderAmount": zod.string().optional(),
+  "commissionPercent": zod.string()
+})
+
+
+/**
+ * @summary Update a commission tier
+ */
+export const UpdateCommissionTierParams = zod.object({
+  "tierId": zod.coerce.number()
+})
+
+export const UpdateCommissionTierBody = zod.object({
+  "minOrderAmount": zod.string().optional(),
+  "maxOrderAmount": zod.string().nullish(),
+  "commissionPercent": zod.string().optional(),
+  "isActive": zod.boolean().optional()
+})
+
+export const UpdateCommissionTierResponse = zod.object({
+  "id": zod.number(),
+  "shopId": zod.number().nullish(),
+  "minOrderAmount": zod.string(),
+  "maxOrderAmount": zod.string().nullish(),
+  "commissionPercent": zod.string(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a commission tier
+ */
+export const DeleteCommissionTierParams = zod.object({
+  "tierId": zod.coerce.number()
+})
+
+
+/**
+ * @summary Preview commission amount for a given order amount
+ */
+export const PreviewCommissionBody = zod.object({
+  "orderAmount": zod.string(),
+  "shopId": zod.number().optional()
+})
+
+export const PreviewCommissionResponse = zod.object({
+  "orderAmount": zod.string(),
+  "commissionPercent": zod.string(),
+  "commissionAmount": zod.string(),
+  "sellerReceives": zod.string(),
+  "tierId": zod.number().nullish()
 })
 
 
