@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Check, Send, Copy, ShieldCheck, Star, Award, CheckCircle2, Info, CheckCircle, ChevronRight, Shield, Activity, Users, Tag } from "lucide-react";
 
 export function KolOnboarding() {

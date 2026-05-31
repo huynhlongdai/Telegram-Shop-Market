@@ -1,4 +1,4 @@
-import React from "react";
+
 import { ArrowLeft, Check, MapPin, Lock, MessageCircle, AlertCircle, ExternalLink } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";

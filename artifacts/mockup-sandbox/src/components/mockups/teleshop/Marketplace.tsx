@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Search, ShoppingBag, Home, User, Wallet, Star, ChevronRight, Clock, ShieldCheck } from "lucide-react";
 
 export function Marketplace() {

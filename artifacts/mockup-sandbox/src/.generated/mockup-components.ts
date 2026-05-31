@@ -3,6 +3,7 @@ type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 export const modules: ModuleMap = {
   "./components/mockups/teleshop/AdminPanel.tsx": () => import("../components/mockups/teleshop/AdminPanel.tsx"),
   "./components/mockups/teleshop/AffiliateDashboard.tsx": () => import("../components/mockups/teleshop/AffiliateDashboard.tsx"),
+  "./components/mockups/teleshop/AuthWelcome.tsx": () => import("../components/mockups/teleshop/AuthWelcome.tsx"),
   "./components/mockups/teleshop/CheckoutSteps.tsx": () => import("../components/mockups/teleshop/CheckoutSteps.tsx"),
   "./components/mockups/teleshop/CreateShop.tsx": () => import("../components/mockups/teleshop/CreateShop.tsx"),
   "./components/mockups/teleshop/DisputeFlow.tsx": () => import("../components/mockups/teleshop/DisputeFlow.tsx"),
@@ -12,6 +13,7 @@ export const modules: ModuleMap = {
   "./components/mockups/teleshop/MerchantDashboard.tsx": () => import("../components/mockups/teleshop/MerchantDashboard.tsx"),
   "./components/mockups/teleshop/OrderTracking.tsx": () => import("../components/mockups/teleshop/OrderTracking.tsx"),
   "./components/mockups/teleshop/ProductDetail.tsx": () => import("../components/mockups/teleshop/ProductDetail.tsx"),
+  "./components/mockups/teleshop/RegisterShop.tsx": () => import("../components/mockups/teleshop/RegisterShop.tsx"),
   "./components/mockups/teleshop/ShopPage.tsx": () => import("../components/mockups/teleshop/ShopPage.tsx"),
   "./components/mockups/teleshop/VoucherSetup.tsx": () => import("../components/mockups/teleshop/VoucherSetup.tsx"),
   "./components/mockups/teleshop/WalletWithdraw.tsx": () => import("../components/mockups/teleshop/WalletWithdraw.tsx")

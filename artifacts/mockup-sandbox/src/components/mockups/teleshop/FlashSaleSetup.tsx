@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Calendar, Bell, Sparkles, X, ChevronRight, Zap, Info } from 'lucide-react';
 
 export function FlashSaleSetup() {
