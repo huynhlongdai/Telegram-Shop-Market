@@ -7,8 +7,12 @@ export const modules: ModuleMap = {
   "./components/mockups/teleshop/CreateShop.tsx": () => import("../components/mockups/teleshop/CreateShop.tsx"),
   "./components/mockups/teleshop/DisputeFlow.tsx": () => import("../components/mockups/teleshop/DisputeFlow.tsx"),
   "./components/mockups/teleshop/FlashSaleSetup.tsx": () => import("../components/mockups/teleshop/FlashSaleSetup.tsx"),
+  "./components/mockups/teleshop/KolOnboarding.tsx": () => import("../components/mockups/teleshop/KolOnboarding.tsx"),
   "./components/mockups/teleshop/Marketplace.tsx": () => import("../components/mockups/teleshop/Marketplace.tsx"),
   "./components/mockups/teleshop/MerchantDashboard.tsx": () => import("../components/mockups/teleshop/MerchantDashboard.tsx"),
+  "./components/mockups/teleshop/OrderTracking.tsx": () => import("../components/mockups/teleshop/OrderTracking.tsx"),
   "./components/mockups/teleshop/ProductDetail.tsx": () => import("../components/mockups/teleshop/ProductDetail.tsx"),
-  "./components/mockups/teleshop/ShopPage.tsx": () => import("../components/mockups/teleshop/ShopPage.tsx")
+  "./components/mockups/teleshop/ShopPage.tsx": () => import("../components/mockups/teleshop/ShopPage.tsx"),
+  "./components/mockups/teleshop/VoucherSetup.tsx": () => import("../components/mockups/teleshop/VoucherSetup.tsx"),
+  "./components/mockups/teleshop/WalletWithdraw.tsx": () => import("../components/mockups/teleshop/WalletWithdraw.tsx")
 };
