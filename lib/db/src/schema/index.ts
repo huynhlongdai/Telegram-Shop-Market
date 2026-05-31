@@ -5,3 +5,5 @@ export * from "./orders";
 export * from "./vouchers";
 export * from "./affiliates";
 export * from "./commissionTiers";
+export * from "./disputes";
+export * from "./walletTransactions";

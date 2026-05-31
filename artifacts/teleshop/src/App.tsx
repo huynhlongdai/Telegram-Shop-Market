@@ -18,6 +18,12 @@ import OrderManagement from "@/pages/OrderManagement";
 import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import UserProfile from "@/pages/UserProfile";
 import ShopSettings from "@/pages/ShopSettings";
+import WalletPage from "@/pages/WalletPage";
+import DisputePage from "@/pages/DisputePage";
+import FlashSalePage from "@/pages/FlashSalePage";
+import VoucherPage from "@/pages/VoucherPage";
+import KolOnboardingPage from "@/pages/KolOnboardingPage";
+import AdminPage from "@/pages/AdminPage";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/Layout";
 
@@ -38,13 +44,19 @@ function Router() {
         <Route path="/product/:productId" component={ProductDetail} />
         <Route path="/checkout" component={CheckoutSteps} />
         <Route path="/orders" component={OrderList} />
+        <Route path="/orders/:orderId/dispute" component={DisputePage} />
         <Route path="/orders/:orderId" component={OrderDetail} />
         <Route path="/dashboard" component={MerchantDashboard} />
         <Route path="/dashboard/products" component={ProductList} />
         <Route path="/dashboard/orders" component={OrderManagement} />
-        <Route path="/affiliate" component={AffiliateDashboard} />
-        <Route path="/profile" component={UserProfile} />
+        <Route path="/dashboard/flash-sales" component={FlashSalePage} />
+        <Route path="/dashboard/vouchers" component={VoucherPage} />
         <Route path="/dashboard/settings" component={ShopSettings} />
+        <Route path="/affiliate" component={AffiliateDashboard} />
+        <Route path="/kol-onboarding" component={KolOnboardingPage} />
+        <Route path="/wallet" component={WalletPage} />
+        <Route path="/admin" component={AdminPage} />
+        <Route path="/profile" component={UserProfile} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

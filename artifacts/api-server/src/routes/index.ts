@@ -8,6 +8,9 @@ import ordersRouter from "./orders.js";
 import vouchersRouter from "./vouchers.js";
 import affiliatesRouter from "./affiliates.js";
 import commissionRouter from "./commission.js";
+import walletRouter from "./wallet.js";
+import disputesRouter from "./disputes.js";
+import adminRouter from "./admin.js";
 
 const router: IRouter = Router();
 
@@ -20,5 +23,8 @@ router.use(ordersRouter);
 router.use(vouchersRouter);
 router.use(affiliatesRouter);
 router.use(commissionRouter);
+router.use(walletRouter);
+router.use(disputesRouter);
+router.use(adminRouter);
 
 export default router;
