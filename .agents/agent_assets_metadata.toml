@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "xhV4p3fCRNAiJugrM3BXJ"
+uri = "file://TeleShop-Plan.md"
+type = "text"
+title = "TeleShop Project Plan"
