@@ -11,6 +11,7 @@ import commissionRouter from "./commission.js";
 import walletRouter from "./wallet.js";
 import disputesRouter from "./disputes.js";
 import adminRouter from "./admin.js";
+import paymentsRouter from "./payments.js";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(commissionRouter);
 router.use(walletRouter);
 router.use(disputesRouter);
 router.use(adminRouter);
+router.use(paymentsRouter);
 
 export default router;
