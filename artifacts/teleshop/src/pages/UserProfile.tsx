@@ -1,115 +1,13 @@
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { User, Settings, Package, LogOut, ExternalLink, Store, Globe, Wallet } from "lucide-react";
+import { User, Package, LogOut, ArrowRight, Store, Globe, Wallet, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { setLanguage, LANGUAGES } from "@/lib/i18n";
 import { useState } from "react";
 import i18n from "@/lib/i18n";
-
 export default function UserProfile() {
-  const { user, logout } = useAuth();
-  const { t } = useTranslation();
-  const [showLangPicker, setShowLangPicker] = useState(false);
-
-  if (!user) {
-    return <div className="p-8 text-center">{t("profile.pleaseLogin")}</div>;
-  }
-
-  return (
-    <div className="p-4 space-y-8 pb-20">
-      <div className="flex flex-col items-center pt-8 space-y-4">
-        <div className="w-24 h-24 bg-gradient-to-br from-primary to-blue-600 rounded-full p-1">
-          <div className="w-full h-full bg-card rounded-full border-4 border-background flex items-center justify-center overflow-hidden">
-            <User className="w-10 h-10 text-muted-foreground" />
-          </div>
-        </div>
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold">{user.username || "Telegram User"}</h1>
-          <p className="text-sm text-muted-foreground font-mono bg-muted px-3 py-1 rounded-full inline-block">
-            {user.telegramId}
-          </p>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-2">{t("profile.account")}</h3>
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
-          <Link href="/orders" className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors border-b border-border">
-            <div className="flex items-center gap-3">
-              <Package className="w-5 h-5 text-primary" />
-              <span className="font-medium">{t("profile.myOrders")}</span>
-            </div>
-            <ExternalLink className="w-4 h-4 text-muted-foreground" />
-          </Link>
-          <Link href="/dashboard" className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors border-b border-border">
-            <div className="flex items-center gap-3">
-              <Store className="w-5 h-5 text-primary" />
-              <span className="font-medium">{t("profile.merchantDashboard")}</span>
-            </div>
-            <ExternalLink className="w-4 h-4 text-muted-foreground" />
-          </Link>
-          <Link href="/wallet" className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-3">
-              <Wallet className="w-5 h-5 text-primary" />
-              <span className="font-medium">{t("profile.wallet")}</span>
-            </div>
-            <ExternalLink className="w-4 h-4 text-muted-foreground" />
-          </Link>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-2">{t("profile.settings")}</h3>
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
-          <div
-            className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors cursor-pointer border-b border-border"
-            onClick={() => setShowLangPicker(!showLangPicker)}
-          >
-            <div className="flex items-center gap-3">
-              <Globe className="w-5 h-5 text-muted-foreground" />
-              <span className="font-medium">{t("profile.language")}</span>
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {LANGUAGES.find(l => l.code === i18n.language)?.flag ?? "🌐"}
-            </span>
-          </div>
-
-          {showLangPicker && (
-            <div className="border-b border-border">
-              {LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  className={`w-full flex items-center gap-3 px-6 py-3 text-sm hover:bg-muted/50 transition-colors ${
-                    i18n.language === lang.code ? "text-primary font-semibold" : "text-foreground"
-                  }`}
-                  onClick={() => {
-                    setLanguage(lang.code);
-                    setShowLangPicker(false);
-                  }}
-                >
-                  <span className="text-lg">{lang.flag}</span>
-                  <span>{lang.label}</span>
-                  {i18n.language === lang.code && <span className="ml-auto text-primary">✓</span>}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div
-            className="flex items-center justify-between p-4 hover:bg-destructive/10 transition-colors cursor-pointer text-destructive"
-            onClick={() => {
-              logout();
-              window.location.href = "/welcome";
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">{t("profile.signOut")}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const { user, logout } = useAuth(); const { t } = useTranslation(); const [showLanguages, setShowLanguages] = useState(false); if (!user) return <div className="p-8 text-center text-sm text-muted-foreground">{t("profile.pleaseLogin")}</div>;
+  return <div className="space-y-6 px-4 py-5 pb-24"><section className="app-surface overflow-hidden"><div className="flex items-center gap-4 border-b border-white/[0.07] p-4"><span className="grid h-14 w-14 place-items-center rounded-lg border border-white/[0.09] bg-white/[0.04]"><User className="h-6 w-6 text-primary" /></span><div className="min-w-0 flex-1"><p className="eyebrow mb-1.5">Telegram identity</p><h1 className="truncate text-lg font-semibold">{user.username || "Telegram User"}</h1><p className="mt-1 font-mono text-[10px] text-muted-foreground">ID {user.telegramId}</p></div><ShieldCheck className="h-4 w-4 text-primary" /></div><div className="grid grid-cols-3 divide-x divide-white/[0.07] p-1"><Shortcut href="/orders" icon={Package} label="Orders" /><Shortcut href="/dashboard" icon={Store} label="Sell" /><Shortcut href="/wallet" icon={Wallet} label="Wallet" /></div></section><section><p className="eyebrow mb-3">Account</p><div className="app-surface overflow-hidden"><Menu href="/orders" icon={Package} label={t("profile.myOrders")} /><Menu href="/dashboard" icon={Store} label={t("profile.merchantDashboard")} /><Menu href="/wallet" icon={Wallet} label={t("profile.wallet")} /></div></section><section><p className="eyebrow mb-3">Preferences</p><div className="app-surface overflow-hidden"><button onClick={() => setShowLanguages(!showLanguages)} className="flex min-h-14 w-full items-center gap-3 border-b border-white/[0.07] px-4 text-left"><Globe className="h-4 w-4 text-muted-foreground" /><span className="flex-1 text-sm font-medium">{t("profile.language")}</span><span className="text-sm">{LANGUAGES.find((item) => item.code === i18n.language)?.flag ?? "🌐"}</span></button>{showLanguages && <div className="border-b border-white/[0.07] bg-[#0d1015] p-2">{LANGUAGES.map((language) => <button key={language.code} onClick={() => { setLanguage(language.code); setShowLanguages(false); }} className={`flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-xs ${i18n.language === language.code ? "bg-primary/[0.08] text-primary" : "text-muted-foreground"}`}><span>{language.flag}</span><span>{language.label}</span>{i18n.language === language.code && <span className="ml-auto">✓</span>}</button>)}</div>}<button onClick={() => { logout(); window.location.href = "/welcome"; }} className="flex min-h-14 w-full items-center gap-3 px-4 text-left text-red-300"><LogOut className="h-4 w-4" /><span className="text-sm font-medium">{t("profile.signOut")}</span></button></div></section></div>;
 }
+function Menu({ href, icon: Icon, label }: { href: string; icon: typeof Package; label: string }) { return <Link href={href} className="flex min-h-14 items-center gap-3 border-b border-white/[0.07] px-4 last:border-0"><Icon className="h-4 w-4 text-primary" /><span className="flex-1 text-sm font-medium">{label}</span><ArrowRight className="h-4 w-4 text-muted-foreground" /></Link>; }
+function Shortcut({ href, icon: Icon, label }: { href: string; icon: typeof Package; label: string }) { return <Link href={href} className="flex min-h-[72px] flex-col items-center justify-center gap-2 text-[10px] font-medium text-muted-foreground"><Icon className="h-4 w-4 text-primary" />{label}</Link>; }

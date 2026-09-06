@@ -1,47 +1,9 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Check, ArrowLeft, Store, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
-
-const PLANS = [
-  { name: "Starter", price: "30 USDT", features: ["10 Products", "Basic Analytics", "Standard Support"] },
-  { name: "Growth", price: "80 USDT", features: ["100 Products", "Advanced Analytics", "Priority Support", "Custom Vouchers"] },
-  { name: "Pro", price: "200 USDT", features: ["Unlimited Products", "API Access", "24/7 Support", "Affiliate Program"] },
-];
-
+const plans = [{ name: "Starter", price: "30 USDT", note: "Launch a focused catalog", features: ["10 products", "Basic analytics", "Standard support"] }, { name: "Growth", price: "80 USDT", note: "Operate a growing shop", features: ["100 products", "Advanced analytics", "Custom vouchers"] }, { name: "Pro", price: "200 USDT", note: "Build a distribution network", features: ["Unlimited products", "API access", "Affiliate program"] }];
 export default function RegisterShop() {
-  return (
-    <div className="p-4 pb-20 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold">Open a Shop</h1>
-        <p className="text-muted-foreground text-sm">Choose a plan to start selling</p>
-      </div>
-
-      <div className="space-y-4">
-        {PLANS.map(plan => (
-          <Card key={plan.name} className="p-5 border-border bg-card">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold text-lg">{plan.name}</h3>
-              <span className="text-primary font-bold">{plan.price}</span>
-            </div>
-            <ul className="space-y-2 mb-6">
-              {plan.features.map(f => (
-                <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Check className="w-4 h-4 text-primary" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Button className="w-full rounded-full">Select {plan.name}</Button>
-          </Card>
-        ))}
-      </div>
-      
-      <div className="text-center pt-4">
-        <Link href="/welcome" className="text-sm text-muted-foreground hover:text-foreground">
-          Back to Login
-        </Link>
-      </div>
-    </div>
-  );
+  const [selected, setSelected] = useState("Growth");
+  return <div className="pb-8"><div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3"><Link href="/welcome" className="grid h-11 w-11 place-items-center rounded-lg border border-white/[0.09] bg-card"><ArrowLeft className="h-4 w-4" /></Link><div><p className="eyebrow mb-1">Merchant onboarding</p><p className="text-sm font-medium">Open a shop</p></div></div><div className="space-y-6 px-4 py-5"><section><span className="grid h-12 w-12 place-items-center rounded-lg border border-primary/20 bg-primary/[0.06] text-primary"><Store className="h-5 w-5" /></span><h1 className="mt-5 text-[28px] font-semibold leading-[1.08] tracking-[-0.04em]">Choose the operating plan that fits your catalog.</h1><p className="mt-3 text-sm leading-6 text-muted-foreground">Plan pricing shown here is a product decision, not a completed payment. Billing must be confirmed by the server.</p></section><div className="space-y-3">{plans.map((plan) => { const active = selected === plan.name; return <button key={plan.name} onClick={() => setSelected(plan.name)} className={`app-surface w-full p-4 text-left ${active ? "border-primary/40 bg-primary/[0.03]" : ""}`}><div className="flex items-start justify-between gap-3"><div><p className="eyebrow mb-1.5">{plan.note}</p><h2 className="text-lg font-semibold">{plan.name}</h2></div><p className="mono-value text-sm font-semibold text-primary">{plan.price}</p></div><div className="mt-4 grid gap-2">{plan.features.map((feature) => <span key={feature} className="flex items-center gap-2 text-xs text-muted-foreground"><Check className="h-3.5 w-3.5 text-primary" />{feature}</span>)}</div>{active && <div className="mt-4 flex items-center gap-2 border-t border-white/[0.07] pt-3 font-mono text-[10px] uppercase text-primary"><ShieldCheck className="h-3.5 w-3.5" />Selected plan</div>}</button>; })}</div><Button disabled className="h-12 w-full rounded-lg font-mono text-xs font-bold uppercase tracking-[0.08em]">Continue with {selected}</Button><p className="text-center text-[10px] leading-4 text-muted-foreground">Shop creation and plan billing are not wired on this screen yet.</p></div></div>;
 }
