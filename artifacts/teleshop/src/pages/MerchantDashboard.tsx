@@ -1,89 +1,27 @@
 import { Link } from "wouter";
 import { useGetMyShop } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Package, TrendingUp, ShoppingBag, Settings, Zap, Tag } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { Package, ShoppingBag, Settings, Zap, Tag, ArrowRight, Activity, ShieldCheck, Bot } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-const data = [
-  { name: "Mon", revenue: 400 },
-  { name: "Tue", revenue: 300 },
-  { name: "Wed", revenue: 550 },
-  { name: "Thu", revenue: 450 },
-  { name: "Fri", revenue: 700 },
-  { name: "Sat", revenue: 650 },
-  { name: "Sun", revenue: 800 },
+const actions = [
+  { href: "/dashboard/orders", icon: ShoppingBag, title: "Order queue", note: "Review and fulfill purchases" },
+  { href: "/dashboard/products", icon: Package, title: "Catalog & offers", note: "Manage price, stock and delivery" },
+  { href: "/dashboard/settings", icon: Bot, title: "Bot & fulfillment", note: "API, notifications and automation" },
+  { href: "/dashboard/vouchers", icon: Tag, title: "Promotions", note: "Vouchers and reseller campaigns" },
 ];
 
 export default function MerchantDashboard() {
   const { t } = useTranslation();
   const { data: shop, isLoading } = useGetMyShop();
-
+  if (isLoading) return <div className="space-y-3 p-4"><Skeleton className="h-28 rounded-xl" /><Skeleton className="h-24 rounded-xl" /><Skeleton className="h-20 rounded-xl" /><Skeleton className="h-20 rounded-xl" /></div>;
   return (
-    <div className="p-4 space-y-6 pb-20">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{t("dashboard.title")}</h1>
-        {shop && <span className="text-sm font-medium bg-primary/20 text-primary px-3 py-1 rounded-full">{shop.name}</span>}
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-card border border-border p-4 rounded-xl">
-          <div className="flex items-center gap-2 text-muted-foreground mb-2">
-            <TrendingUp className="w-4 h-4" />
-            <span className="text-xs font-medium">{t("dashboard.revenue")}</span>
-          </div>
-          <div className="text-xl font-bold">3,850 USDT</div>
-        </div>
-        <div className="bg-card border border-border p-4 rounded-xl">
-          <div className="flex items-center gap-2 text-muted-foreground mb-2">
-            <ShoppingBag className="w-4 h-4" />
-            <span className="text-xs font-medium">{t("dashboard.orders")}</span>
-          </div>
-          <div className="text-xl font-bold">124</div>
-        </div>
-      </div>
-
-      <div className="bg-card border border-border p-4 rounded-xl space-y-4">
-        <h2 className="font-semibold text-sm">{t("dashboard.revenueChart")}</h2>
-        <div className="h-40 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <XAxis dataKey="name" stroke="#8899AA" fontSize={10} tickLine={false} axisLine={false} />
-              <Tooltip
-                contentStyle={{ backgroundColor: "#0E1520", borderColor: "#1E293B", borderRadius: "8px" }}
-                itemStyle={{ color: "#0098EA" }}
-              />
-              <Line type="monotone" dataKey="revenue" stroke="#0098EA" strokeWidth={3} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <h2 className="font-semibold text-sm">{t("dashboard.quickActions")}</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="/dashboard/products" className="bg-card border border-border p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-accent transition-colors">
-            <Package className="w-6 h-6 text-primary" />
-            <span className="text-sm font-medium">{t("dashboard.products")}</span>
-          </Link>
-          <Link href="/dashboard/orders" className="bg-card border border-border p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-accent transition-colors">
-            <ShoppingBag className="w-6 h-6 text-primary" />
-            <span className="text-sm font-medium">{t("dashboard.orders")}</span>
-          </Link>
-          <Link href="/dashboard/flash-sales" className="bg-card border border-border p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-accent transition-colors">
-            <Zap className="w-6 h-6 text-amber-500" />
-            <span className="text-sm font-medium">{t("dashboard.flashSales")}</span>
-          </Link>
-          <Link href="/dashboard/vouchers" className="bg-card border border-border p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-accent transition-colors">
-            <Tag className="w-6 h-6 text-emerald-500" />
-            <span className="text-sm font-medium">{t("dashboard.vouchers")}</span>
-          </Link>
-          <Link href="/dashboard/settings" className="bg-card border border-border p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-accent transition-colors col-span-2">
-            <Settings className="w-6 h-6 text-primary" />
-            <span className="text-sm font-medium">{t("dashboard.botSettings")}</span>
-          </Link>
-        </div>
-      </div>
+    <div className="space-y-7 px-4 py-5">
+      <section><div className="mb-3 flex items-center justify-between"><p className="eyebrow">Merchant console</p><span className="flex items-center gap-2 font-mono text-[10px] text-primary"><span className="status-dot" /> LIVE</span></div><h1 className="text-[28px] font-semibold tracking-[-0.04em]">{shop?.name || t("dashboard.title")}</h1><p className="mt-2 text-sm leading-6 text-muted-foreground">Operate orders, offers and automated delivery from one queue.</p></section>
+      <section className="app-surface overflow-hidden"><div className="flex items-center justify-between border-b border-white/[0.07] p-4"><div><p className="eyebrow mb-2">Operations</p><p className="text-sm font-medium">System readiness</p></div><Activity className="h-5 w-5 text-primary" /></div><div className="grid grid-cols-3 divide-x divide-white/[0.07] p-1"><Health label="Shop" value={shop?.status || "pending"} icon={ShieldCheck} /><Health label="Catalog" value="Ready" icon={Package} /><Health label="Bot" value={shop?.botToken ? "Linked" : "Setup"} icon={Bot} /></div></section>
+      <section><div className="mb-3 flex items-end justify-between"><div><p className="eyebrow mb-1.5">Work queue</p><h2 className="text-lg font-semibold tracking-[-0.025em]">Merchant tools</h2></div><Settings className="h-4 w-4 text-muted-foreground" /></div><div className="space-y-2">{actions.map(({ href, icon: Icon, title, note }) => <Link key={href} href={href} className="app-surface group flex min-h-[76px] items-center gap-3 p-3 transition-colors hover:border-white/[0.16]"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-primary/[0.08] text-primary"><Icon className="h-[18px] w-[18px]" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-medium">{title}</span><span className="mt-1 block truncate text-xs text-muted-foreground">{note}</span></span><ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></Link>)}</div></section>
+      <section><p className="eyebrow mb-3">Campaigns</p><Link href="/dashboard/flash-sales" className="flex min-h-[72px] items-center gap-3 rounded-lg border border-amber-400/15 bg-amber-400/[0.05] p-3"><span className="grid h-10 w-10 place-items-center rounded-lg bg-amber-400/10 text-amber-300"><Zap className="h-4 w-4" /></span><span className="flex-1"><span className="block text-sm font-medium">Flash sales</span><span className="mt-1 block text-xs text-muted-foreground">Schedule time-limited offer pricing</span></span><ArrowRight className="h-4 w-4 text-muted-foreground" /></Link></section>
     </div>
   );
 }
+function Health({ label, value, icon: Icon }: { label: string; value: string; icon: typeof ShieldCheck }) { return <div className="px-2 py-3 text-center"><Icon className="mx-auto mb-2 h-4 w-4 text-primary" /><p className="eyebrow mb-1">{label}</p><p className="mono-value truncate text-[11px] font-medium capitalize">{value}</p></div>; }
