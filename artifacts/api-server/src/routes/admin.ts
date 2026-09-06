@@ -1,19 +1,30 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type NextFunction, type Response } from "express";
 import { db, shopsTable, ordersTable, disputesTable, usersTable } from "@workspace/db";
 import { eq, sql, desc } from "drizzle-orm";
 import { requireAuth, type AuthRequest } from "../middlewares/requireAuth.js";
 
 const router: IRouter = Router();
 
-function requireAdmin(req: AuthRequest, res: any, next: any): void {
+async function requireAdmin(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   if (!req.userId) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
+
+  const [user] = await db
+    .select({ role: usersTable.role })
+    .from(usersTable)
+    .where(eq(usersTable.id, req.userId));
+
+  if (!user || user.role !== "admin") {
+    res.status(403).json({ error: "Admin access required" });
+    return;
+  }
+
   next();
 }
 
-router.get("/admin/stats", requireAuth, requireAdmin, async (req: AuthRequest, res): Promise<void> => {
+router.get("/admin/stats", requireAuth, requireAdmin, async (_req: AuthRequest, res): Promise<void> => {
   const [shopCount, orderCount, disputeCount] = await Promise.all([
     db.select({ count: sql<number>`count(*)::int` }).from(shopsTable).where(eq(shopsTable.status, "active")),
     db.select({ count: sql<number>`count(*)::int` }).from(ordersTable),
@@ -35,12 +46,16 @@ router.get("/admin/stats", requireAuth, requireAdmin, async (req: AuthRequest, r
 
 router.get("/admin/shops", requireAuth, requireAdmin, async (req: AuthRequest, res): Promise<void> => {
   const status = (req.query.status as string) ?? "pending";
-  const page = Number(req.query.page ?? 1);
-  const limit = Number(req.query.limit ?? 20);
+  const page = Math.max(1, Number(req.query.page ?? 1));
+  const limit = Math.min(100, Math.max(1, Number(req.query.limit ?? 20)));
   const offset = (page - 1) * limit;
 
-  const where = status === "all" ? undefined : eq(shopsTable.status, status);
+  if (!["all", "pending", "active", "suspended"].includes(status)) {
+    res.status(400).json({ error: "Invalid status" });
+    return;
+  }
 
+  const where = status === "all" ? undefined : eq(shopsTable.status, status);
   const [items, countResult] = await Promise.all([
     db.select().from(shopsTable).where(where).orderBy(desc(shopsTable.createdAt)).limit(limit).offset(offset),
     db.select({ count: sql<number>`count(*)::int` }).from(shopsTable).where(where),
@@ -51,7 +66,7 @@ router.get("/admin/shops", requireAuth, requireAdmin, async (req: AuthRequest, r
 
 router.patch("/admin/shops/:shopId", requireAuth, requireAdmin, async (req: AuthRequest, res): Promise<void> => {
   const shopId = Number(req.params.shopId);
-  if (isNaN(shopId)) {
+  if (!Number.isInteger(shopId) || shopId <= 0) {
     res.status(400).json({ error: "Invalid shopId" });
     return;
   }
@@ -77,12 +92,16 @@ router.patch("/admin/shops/:shopId", requireAuth, requireAdmin, async (req: Auth
 
 router.get("/admin/disputes", requireAuth, requireAdmin, async (req: AuthRequest, res): Promise<void> => {
   const status = (req.query.status as string) ?? "open";
-  const page = Number(req.query.page ?? 1);
-  const limit = Number(req.query.limit ?? 20);
+  const page = Math.max(1, Number(req.query.page ?? 1));
+  const limit = Math.min(100, Math.max(1, Number(req.query.limit ?? 20)));
   const offset = (page - 1) * limit;
 
-  const where = status === "all" ? undefined : eq(disputesTable.status, status);
+  if (!["all", "open", "notified", "reviewing", "admin_review", "resolved"].includes(status)) {
+    res.status(400).json({ error: "Invalid status" });
+    return;
+  }
 
+  const where = status === "all" ? undefined : eq(disputesTable.status, status);
   const [items, countResult] = await Promise.all([
     db.select().from(disputesTable).where(where).orderBy(desc(disputesTable.createdAt)).limit(limit).offset(offset),
     db.select({ count: sql<number>`count(*)::int` }).from(disputesTable).where(where),
@@ -93,14 +112,18 @@ router.get("/admin/disputes", requireAuth, requireAdmin, async (req: AuthRequest
 
 router.patch("/admin/disputes/:disputeId", requireAuth, requireAdmin, async (req: AuthRequest, res): Promise<void> => {
   const disputeId = Number(req.params.disputeId);
-  if (isNaN(disputeId)) {
+  if (!Number.isInteger(disputeId) || disputeId <= 0) {
     res.status(400).json({ error: "Invalid disputeId" });
     return;
   }
 
   const { status, resolution, adminNote } = req.body;
-  if (!status) {
-    res.status(400).json({ error: "status is required" });
+  if (!status || !["notified", "reviewing", "admin_review", "resolved"].includes(status)) {
+    res.status(400).json({ error: "Invalid status" });
+    return;
+  }
+  if (status === "resolved" && (!resolution || typeof resolution !== "string")) {
+    res.status(400).json({ error: "resolution is required when resolving a dispute" });
     return;
   }
 
