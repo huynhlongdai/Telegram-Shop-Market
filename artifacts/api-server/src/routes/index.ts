@@ -11,9 +11,10 @@ import commissionRouter from "./commission.js";
 import walletRouter from "./wallet.js";
 import disputesRouter from "./disputes.js";
 import adminRouter from "./admin.js";
+import paymentsRouter from "./payments.js";
+import flashSalesRouter from "./flashSales.js";
 
 const router: IRouter = Router();
-
 router.use(healthRouter);
 router.use(authRouter);
 router.use(usersRouter);
@@ -26,5 +27,6 @@ router.use(commissionRouter);
 router.use(walletRouter);
 router.use(disputesRouter);
 router.use(adminRouter);
-
+router.use(paymentsRouter);
+router.use(flashSalesRouter);
 export default router;

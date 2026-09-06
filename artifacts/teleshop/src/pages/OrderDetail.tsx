@@ -1,110 +1,36 @@
 import { useParams, Link } from "wouter";
 import { useGetOrder } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Package, Clock, Truck, CheckCircle2, Copy } from "lucide-react";
+import { ArrowLeft, Clock3, CheckCircle2, ShieldAlert, Copy, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { formatPrice } from "@/lib/utils";
+
+const steps = [
+  { key: "pending", label: "Order created", note: "Waiting for payment confirmation" },
+  { key: "confirmed", label: "Payment confirmed", note: "Fulfillment can now begin" },
+  { key: "shipped", label: "Fulfillment sent", note: "Delivery data has been issued" },
+  { key: "completed", label: "Order completed", note: "Settlement record is finalized" },
+];
 
 export default function OrderDetail() {
   const { orderId } = useParams();
   const { data: order, isLoading } = useGetOrder(Number(orderId) || 0, { query: { enabled: !!orderId } });
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({ title: "Copied to clipboard" });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="p-4 space-y-6">
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-      </div>
-    );
-  }
-
-  if (!order) return <div className="p-8 text-center">Order not found</div>;
-
-  const statuses = ["pending", "shipped", "delivered"];
-  const currentStatusIndex = statuses.indexOf(order.status);
-
+  const copy = async (value: string) => { await navigator.clipboard.writeText(value); toast({ title: "Copied to clipboard" }); };
+  if (isLoading) return <div className="space-y-4 p-4"><Skeleton className="h-12 rounded-lg" /><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-44 rounded-xl" /></div>;
+  if (!order) return <div className="p-8 text-center text-sm text-muted-foreground">Order not found</div>;
+  const current = order.status === "delivered" ? 2 : steps.findIndex((step) => step.key === order.status);
+  const isDisputed = order.status === "disputed";
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border p-4 flex items-center gap-3">
-        <Link href="/orders" className="p-2 -ml-2 rounded-full hover:bg-muted">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <h1 className="text-lg font-bold">Order #{order.id}</h1>
-      </div>
-
-      <div className="p-4 space-y-6">
-        <div className="bg-card border border-border rounded-xl p-5">
-          <h2 className="font-semibold mb-6">Tracking Status</h2>
-          
-          <div className="relative pl-6 space-y-8">
-            <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-border" />
-            
-            <div className="relative z-10">
-              <div className={`absolute -left-[31px] w-6 h-6 rounded-full flex items-center justify-center ${currentStatusIndex >= 0 ? 'bg-primary text-primary-foreground' : 'bg-muted border border-border text-muted-foreground'}`}>
-                <Clock className="w-3 h-3" />
-              </div>
-              <div>
-                <p className={`font-medium ${currentStatusIndex >= 0 ? 'text-foreground' : 'text-muted-foreground'}`}>Order Placed</p>
-                <p className="text-xs text-muted-foreground mt-1">{new Date(order.createdAt).toLocaleString()}</p>
-              </div>
-            </div>
-
-            <div className="relative z-10">
-              <div className={`absolute -left-[31px] w-6 h-6 rounded-full flex items-center justify-center ${currentStatusIndex >= 1 ? 'bg-blue-500 text-white' : 'bg-muted border border-border text-muted-foreground'}`}>
-                <Truck className="w-3 h-3" />
-              </div>
-              <div>
-                <p className={`font-medium ${currentStatusIndex >= 1 ? 'text-foreground' : 'text-muted-foreground'}`}>Shipped</p>
-                {currentStatusIndex >= 1 && <p className="text-xs text-muted-foreground mt-1">Your order is on the way</p>}
-              </div>
-            </div>
-
-            <div className="relative z-10">
-              <div className={`absolute -left-[31px] w-6 h-6 rounded-full flex items-center justify-center ${currentStatusIndex >= 2 ? 'bg-green-500 text-white' : 'bg-muted border border-border text-muted-foreground'}`}>
-                <CheckCircle2 className="w-3 h-3" />
-              </div>
-              <div>
-                <p className={`font-medium ${currentStatusIndex >= 2 ? 'text-foreground' : 'text-muted-foreground'}`}>Delivered</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-          <h2 className="font-semibold">Order Summary</h2>
-          
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-              <Package className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-sm">Product Item (placeholder)</p>
-              <p className="text-xs text-muted-foreground">Qty: 1</p>
-            </div>
-            <div className="font-semibold">{formatPrice(order.totalAmount)} USDT</div>
-          </div>
-
-          <div className="h-px bg-border w-full" />
-          
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">Shipping Address</span>
-            <span className="font-medium max-w-[150px] truncate">{order.shippingAddress}</span>
-          </div>
-
-          <div className="h-px bg-border w-full" />
-          
-          <div className="flex justify-between items-center text-lg font-bold">
-            <span>Total Paid</span>
-            <span className="text-primary">{formatPrice(order.totalAmount)} USDT</span>
-          </div>
-        </div>
+    <div className="pb-6">
+      <div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3"><Link href="/orders" className="grid h-11 w-11 place-items-center rounded-lg border border-white/[0.09] bg-card"><ArrowLeft className="h-4 w-4" /></Link><div className="min-w-0 flex-1"><p className="eyebrow mb-1">Order record</p><p className="truncate text-sm font-medium">#{order.id}</p></div><span className="rounded-md border border-white/[0.09] px-2 py-1 font-mono text-[9px] uppercase text-muted-foreground">{order.status}</span></div>
+      <div className="space-y-6 px-4 py-5">
+        {isDisputed && <div className="flex gap-3 rounded-lg border border-red-400/20 bg-red-400/[0.06] p-4"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-300" /><div><p className="text-sm font-medium">This order is disputed</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Settlement is paused while evidence is reviewed.</p></div></div>}
+        <section className="app-surface p-4"><div className="mb-5 flex items-end justify-between"><div><p className="eyebrow mb-1.5">Timeline</p><h1 className="text-lg font-semibold">Fulfillment status</h1></div><Clock3 className="h-4 w-4 text-muted-foreground" /></div><div>{steps.map((step, index) => { const done = current >= index; return <div key={step.key} className="relative flex gap-3 pb-6 last:pb-0"><div className={`absolute left-[9px] top-5 h-full w-px ${done && current > index ? "bg-primary/40" : "bg-white/[0.08]"}`} /><span className={`relative z-10 mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border ${done ? "border-primary bg-primary text-primary-foreground" : "border-white/[0.12] bg-card text-muted-foreground"}`}>{done ? <CheckCircle2 className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}</span><div><p className={`text-sm font-medium ${done ? "text-foreground" : "text-muted-foreground"}`}>{step.label}</p><p className="mt-1 text-xs text-muted-foreground">{index === 0 ? new Date(order.createdAt).toLocaleString() : step.note}</p></div></div>; })}</div></section>
+        <section className="app-surface overflow-hidden"><div className="border-b border-white/[0.07] p-4"><p className="eyebrow mb-1.5">Summary</p><h2 className="text-lg font-semibold">Order details</h2></div><div className="p-4"><Row label="Product" value={`#${order.productId}`} /><Row label="Quantity" value={String(order.quantity)} /><Row label="Payment" value={`${formatPrice(order.totalAmount)} ${order.currency}`} strong /><Row label="Settlement" value={order.escrowStatus} /><Row label="Warranty" value={order.warrantyType} />{order.deliveryAddress && <Row label="Delivery data" value={order.deliveryAddress} />}</div></section>
+        {order.txHash && <button onClick={() => copy(order.txHash!)} className="app-surface flex min-h-14 w-full items-center gap-3 p-3 text-left"><ExternalLink className="h-4 w-4 text-primary" /><span className="min-w-0 flex-1"><span className="eyebrow mb-1 block">Transaction reference</span><span className="block truncate font-mono text-xs">{order.txHash}</span></span><Copy className="h-4 w-4 text-muted-foreground" /></button>}
+        <Link href={`/orders/${order.id}/dispute`} className="flex min-h-11 items-center justify-center text-xs font-medium text-muted-foreground hover:text-foreground">Report a delivery problem</Link>
       </div>
     </div>
   );
 }
+function Row({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) { return <div className="flex min-h-11 items-center justify-between gap-4 border-b border-white/[0.06] last:border-0"><span className="text-xs text-muted-foreground">{label}</span><span className={`max-w-[220px] truncate text-right text-xs capitalize ${strong ? "mono-value font-semibold text-primary" : "font-medium"}`}>{value}</span></div>; }

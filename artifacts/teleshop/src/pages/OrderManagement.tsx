@@ -1,85 +1,10 @@
 import { Link } from "wouter";
 import { useListOrders, useUpdateOrderStatus } from "@workspace/api-client-react";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, CheckCircle2, Truck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Truck, Package, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
 export default function OrderManagement() {
-  const { data: orders, isLoading, refetch } = useListOrders({ query: { enabled: true } });
-  const { mutate: updateStatus, isPending } = useUpdateOrderStatus();
-
-  const handleStatusUpdate = (orderId: number, status: "pending" | "shipped" | "delivered" | "cancelled") => {
-    updateStatus(
-      { orderId, data: { status } },
-      {
-        onSuccess: () => {
-          toast({ title: `Order marked as ${status}` });
-          refetch();
-        }
-      }
-    );
-  };
-
-  return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border p-4 flex items-center gap-3">
-        <Link href="/dashboard" className="p-2 -ml-2 rounded-full hover:bg-muted">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <h1 className="text-lg font-bold">Manage Orders</h1>
-      </div>
-
-      <div className="p-4 space-y-4">
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
-          </div>
-        ) : !orders || orders.items.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground text-sm">
-            No orders yet.
-          </div>
-        ) : (
-          orders.items.map(order => (
-            <div key={order.id} className="bg-card border border-border rounded-xl p-4 space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-medium text-sm">Order #{order.id}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{new Date(order.createdAt).toLocaleDateString()}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-primary">{order.totalAmount} USDT</p>
-                  <p className="text-xs font-medium uppercase mt-1 text-muted-foreground">{order.status}</p>
-                </div>
-              </div>
-              
-              <div className="bg-background rounded-lg p-3 text-sm">
-                <p className="text-muted-foreground text-xs mb-1">Shipping to:</p>
-                <p className="line-clamp-2">{order.shippingAddress}</p>
-              </div>
-
-              {order.status === "pending" && (
-                <Button 
-                  className="w-full" 
-                  onClick={() => handleStatusUpdate(order.id, "shipped")}
-                  disabled={isPending}
-                >
-                  <Truck className="w-4 h-4 mr-2" /> Mark as Shipped
-                </Button>
-              )}
-              {order.status === "shipped" && (
-                <Button 
-                  className="w-full bg-green-500 hover:bg-green-600 text-white" 
-                  onClick={() => handleStatusUpdate(order.id, "delivered")}
-                  disabled={isPending}
-                >
-                  <CheckCircle2 className="w-4 h-4 mr-2" /> Mark as Delivered
-                </Button>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
+  const { data, isLoading, refetch } = useListOrders(); const { mutate: updateStatus, isPending } = useUpdateOrderStatus();
+  const update = (orderId: number, status: "shipped" | "completed") => updateStatus({ orderId, data: { status } }, { onSuccess: () => { toast({ title: `Order marked as ${status}` }); refetch(); }, onError: () => toast({ title: "Could not update order", variant: "destructive" }) });
+  return <div className="pb-8"><div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3"><Link href="/dashboard" className="grid h-11 w-11 place-items-center rounded-lg border border-white/[0.09] bg-card"><ArrowLeft className="h-4 w-4" /></Link><div><p className="eyebrow mb-1">Fulfillment operations</p><p className="text-sm font-medium">Manage orders</p></div></div><div className="space-y-3 px-4 py-5">{isLoading ? [1,2,3].map((item) => <Skeleton key={item} className="h-32 rounded-xl" />) : data?.items.length ? data.items.map((order) => { const actionable = order.status === "confirmed" || order.status === "shipped"; return <article key={order.id} className="app-surface p-4"><div className="flex items-start justify-between gap-3"><div><p className="eyebrow mb-1.5">Order #{order.id}</p><p className="mono-value text-base font-semibold">{order.totalAmount} {order.currency}</p></div><span className={`rounded-md border px-2 py-1 font-mono text-[9px] uppercase ${order.status === "disputed" ? "border-red-400/20 text-red-300" : "border-white/[0.09] text-muted-foreground"}`}>{order.status}</span></div><div className="mt-4 flex items-center gap-3 border-t border-white/[0.07] pt-3"><span className="grid h-9 w-9 place-items-center rounded-lg bg-white/[0.04]"><Package className="h-4 w-4 text-muted-foreground" /></span><div className="min-w-0 flex-1"><p className="text-xs font-medium">Product #{order.productId} · Qty {order.quantity}</p><p className="mt-1 truncate text-[10px] text-muted-foreground">{order.deliveryAddress || "No delivery data supplied"}</p></div></div>{order.status === "disputed" && <div className="mt-3 flex gap-2 text-[10px] text-red-300"><AlertTriangle className="h-3.5 w-3.5" />Fulfillment action paused during dispute.</div>}{actionable && <button onClick={() => update(order.id, order.status === "confirmed" ? "shipped" : "completed")} disabled={isPending} className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary font-mono text-xs font-bold uppercase text-primary-foreground disabled:opacity-40">{order.status === "confirmed" ? <><Truck className="h-4 w-4" />Mark fulfilled</> : <><CheckCircle2 className="h-4 w-4" />Complete order</>}</button>}</article>; }) : <div className="app-surface p-10 text-center text-xs text-muted-foreground">No orders in the fulfillment queue.</div>}</div></div>;
 }

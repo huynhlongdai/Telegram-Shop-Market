@@ -11,6 +11,11 @@ export const affiliatesTable = pgTable("affiliates", {
   pendingPayout: numeric("pending_payout", { precision: 18, scale: 6 }).notNull().default("0"),
   totalReferrals: integer("total_referrals").notNull().default(0),
   status: text("status").notNull().default("active"),
+  channelUsername: text("channel_username"),
+  kolApplicationStatus: text("kol_application_status").notNull().default("not_applied"),
+  kolAppliedAt: timestamp("kol_applied_at", { withTimezone: true }),
+  kolReviewedAt: timestamp("kol_reviewed_at", { withTimezone: true }),
+  kolReviewNote: text("kol_review_note"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
