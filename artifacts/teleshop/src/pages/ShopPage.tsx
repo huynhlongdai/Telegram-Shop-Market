@@ -1,83 +1,10 @@
 import { useParams, Link } from "wouter";
 import { useGetShop, useListProducts } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Star, Store } from "lucide-react";
+import { ArrowLeft, Store, Package, ShieldCheck, ArrowRight } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
-
 export default function ShopPage() {
-  const { shopId } = useParams();
-  const { data: shop, isLoading: shopLoading } = useGetShop(Number(shopId) || 0, { query: { enabled: !!shopId } });
-  
-  // In a real app we'd filter by shopId, mocking the list for now
-  const { data: products, isLoading: productsLoading } = useListProducts();
-
-  if (shopLoading) {
-    return (
-      <div className="min-h-screen">
-        <Skeleton className="h-48 w-full" />
-        <div className="p-4 space-y-4 -mt-10 relative z-10">
-          <Skeleton className="h-20 w-20 rounded-xl" />
-          <Skeleton className="h-8 w-2/3" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!shop) return <div className="p-8 text-center">Shop not found</div>;
-
-  return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="relative h-48 bg-gradient-to-br from-primary/40 to-blue-900/40">
-        <Link href="/" className="absolute top-4 left-4 z-10 w-10 h-10 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/10">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div className="absolute inset-0 bg-black/20" />
-      </div>
-
-      <div className="px-4 relative -mt-10 z-10">
-        <div className="w-20 h-20 bg-card rounded-2xl border-4 border-background flex items-center justify-center overflow-hidden shadow-xl">
-          <Store className="w-8 h-8 text-muted-foreground" />
-        </div>
-        
-        <div className="mt-3 flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">{shop.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2 max-w-[280px]">
-              {shop.description || "Welcome to our store!"}
-            </p>
-          </div>
-          <div className="flex items-center gap-1 bg-yellow-500/10 text-yellow-500 px-2 py-1 rounded-lg">
-            <Star className="w-4 h-4 fill-current" />
-            <span className="font-bold text-sm">4.9</span>
-          </div>
-        </div>
-
-        <div className="mt-8 space-y-4">
-          <h2 className="font-semibold text-lg">Products</h2>
-          
-          {productsLoading ? (
-            <div className="grid grid-cols-2 gap-3">
-              {[1, 2, 3].map(i => <Skeleton key={i} className="h-48 rounded-xl" />)}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {products?.items.map(product => (
-                <Link key={product.id} href={`/product/${product.id}`} className="block">
-                  <div className="bg-card border border-border rounded-xl overflow-hidden hover-elevate">
-                    <div className="aspect-square bg-muted">
-                      {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />}
-                    </div>
-                    <div className="p-3">
-                      <h3 className="font-medium text-sm line-clamp-1">{product.name}</h3>
-                      <div className="mt-2 font-bold text-primary">{formatPrice(product.price)} {product.currency}</div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  const { shopId } = useParams(); const id = Number(shopId) || 0; const { data: shop, isLoading } = useGetShop(id, { query: { enabled: id > 0 } }); const { data: products, isLoading: productsLoading } = useListProducts(id ? { shopId: id } : undefined);
+  if (isLoading) return <div className="space-y-4 p-4"><Skeleton className="h-40 rounded-xl" /><Skeleton className="h-24 rounded-xl" /></div>; if (!shop) return <div className="p-8 text-center text-sm text-muted-foreground">Shop not found</div>;
+  return <div className="pb-8"><div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3"><Link href="/" className="grid h-11 w-11 place-items-center rounded-lg border border-white/[0.09] bg-card"><ArrowLeft className="h-4 w-4" /></Link><div><p className="eyebrow mb-1">Storefront</p><p className="text-sm font-medium">@{shop.slug}</p></div></div><div className="space-y-6 px-4 py-5"><section className="app-surface p-5"><div className="flex items-start gap-4"><span className="grid h-14 w-14 place-items-center rounded-lg border border-primary/20 bg-primary/[0.06] text-primary"><Store className="h-6 w-6" /></span><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><h1 className="truncate text-xl font-semibold">{shop.name}</h1>{shop.status === "active" && <ShieldCheck className="h-4 w-4 text-primary" />}</div><p className="mt-2 text-xs leading-5 text-muted-foreground">{shop.description || "This seller has not added a description."}</p></div></div><div className="mt-4 flex gap-4 border-t border-white/[0.07] pt-3 font-mono text-[10px] uppercase text-muted-foreground"><span>{shop.status}</span><span>{shop.plan} plan</span></div></section><section><div className="mb-3 flex items-end justify-between"><div><p className="eyebrow mb-1.5">Catalog</p><h2 className="text-lg font-semibold">Available products</h2></div><span className="font-mono text-[10px] text-muted-foreground">{products?.total ?? 0} ITEMS</span></div>{productsLoading ? <div className="grid grid-cols-2 gap-3">{[1,2,3,4].map((item) => <Skeleton key={item} className="h-52 rounded-xl" />)}</div> : products?.items.length ? <div className="grid grid-cols-2 gap-3">{products.items.map((product) => <Link key={product.id} href={`/product/${product.id}`} className="app-surface group overflow-hidden"><div className="aspect-square bg-[#0d1015]">{product.imageUrl ? <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center"><Package className="h-5 w-5 text-muted-foreground" /></div>}</div><div className="border-t border-white/[0.07] p-3"><p className="truncate text-xs font-medium">{product.name}</p><div className="mt-2 flex items-center justify-between"><p className="mono-value text-[11px] font-semibold text-primary">{formatPrice(product.price)} {product.currency}</p><ArrowRight className="h-3.5 w-3.5 text-muted-foreground" /></div></div></Link>)}</div> : <div className="app-surface p-10 text-center text-xs text-muted-foreground">No active products from this shop.</div>}</section></div></div>;
 }
